@@ -506,6 +506,21 @@
       font-variant-numeric: tabular-nums;
     }
 
+    .delete-trade-button {
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 111, 125, 0.35);
+  border-radius: 8px;
+  color: #ffc0c7;
+  background: rgba(255, 111, 125, 0.1);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.delete-trade-button:hover {
+  color: #ffffff;
+  background: rgba(255, 111, 125, 0.22);
+}
     .empty-note {
       padding: 16px;
       border: 1px dashed rgba(147, 169, 195, 0.28);
@@ -892,6 +907,7 @@
                     <th>Entry</th>
                     <th>Stop</th>
                     <th>Research note</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody id="trade-table-body">
@@ -952,45 +968,124 @@
       });
     });
 
-    const paperTradeForm = document.getElementById("paper-trade-form");
+        const paperTradeForm = document.getElementById("paper-trade-form");
     const tradeTableBody = document.getElementById("trade-table-body");
     const tradeCount = document.getElementById("trade-count");
     const journalCount = document.getElementById("journal-count");
-    let totalTrades = 0;
+    const storageKey = "indian-market-paper-trades";
+
+    function getSavedTrades() {
+      try {
+        const savedTrades = JSON.parse(localStorage.getItem(storageKey));
+        return Array.isArray(savedTrades) ? savedTrades : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveTrades(trades) {
+      localStorage.setItem(storageKey, JSON.stringify(trades));
+    }
+
+    function formatPrice(value) {
+      return Number(value).toLocaleString("en-IN", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function updateTradeCounters(trades) {
+      const totalTrades = trades.length;
+      tradeCount.textContent = totalTrades;
+      journalCount.textContent = `${totalTrades} ${totalTrades === 1 ? "trade" : "trades"}`;
+    }
+
+    function createEmptyRow() {
+      const row = document.createElement("tr");
+      row.id = "empty-row";
+      row.innerHTML = `
+        <td colspan="6">
+          <div class="empty-note">
+            No paper trades yet. Add one on the left after defining your research
+            setup, risk level, and reason for entry.
+          </div>
+        </td>
+      `;
+      tradeTableBody.appendChild(row);
+    }
+
+    function deleteTrade(tradeId) {
+      const updatedTrades = getSavedTrades().filter((trade) => trade.id !== tradeId);
+      saveTrades(updatedTrades);
+      renderTrades();
+    }
+
+    function renderTrades() {
+      const trades = getSavedTrades();
+      tradeTableBody.innerHTML = "";
+
+      if (trades.length === 0) {
+        createEmptyRow();
+        updateTradeCounters(trades);
+        return;
+      }
+
+      trades.forEach((trade) => {
+        const row = document.createElement("tr");
+        const directionClass = trade.direction === "Long" ? "positive" : "negative";
+
+        row.innerHTML = `
+          <td>${trade.indexName}</td>
+          <td class="${directionClass}">${trade.direction}</td>
+          <td>${formatPrice(trade.entry)}</td>
+          <td>${formatPrice(trade.stop)}</td>
+          <td>${trade.note}</td>
+          <td>
+            <button
+              type="button"
+              class="delete-trade-button"
+              data-trade-id="${trade.id}"
+              aria-label="Delete paper trade"
+            >
+              Delete
+            </button>
+          </td>
+        `;
+
+        tradeTableBody.appendChild(row);
+      });
+
+      document.querySelectorAll(".delete-trade-button").forEach((button) => {
+        button.addEventListener("click", () => {
+          const tradeId = Number(button.dataset.tradeId);
+          deleteTrade(tradeId);
+        });
+      });
+
+      updateTradeCounters(trades);
+    }
 
     paperTradeForm.addEventListener("submit", (event) => {
       event.preventDefault();
 
-      const indexName = document.getElementById("trade-index").value;
-      const direction = document.getElementById("trade-direction").value;
-      const entry = document.getElementById("trade-entry").value;
-      const stop = document.getElementById("trade-stop").value;
-      const note = document.getElementById("trade-note").value.trim();
-      const emptyRow = document.getElementById("empty-row");
+      const newTrade = {
+        id: Date.now(),
+        indexName: document.getElementById("trade-index").value,
+        direction: document.getElementById("trade-direction").value,
+        entry: document.getElementById("trade-entry").value,
+        stop: document.getElementById("trade-stop").value,
+        note: document.getElementById("trade-note").value.trim()
+      };
 
-      if (emptyRow) {
-        emptyRow.remove();
-      }
-
-      const row = document.createElement("tr");
-      const directionClass = direction === "Long" ? "positive" : "negative";
-
-      row.innerHTML = `
-        <td>${indexName}</td>
-        <td class="${directionClass}">${direction}</td>
-        <td>${Number(entry).toLocaleString("en-IN")}</td>
-        <td>${Number(stop).toLocaleString("en-IN")}</td>
-        <td>${note}</td>
-      `;
-
-      tradeTableBody.appendChild(row);
-
-      totalTrades += 1;
-      tradeCount.textContent = totalTrades;
-      journalCount.textContent = `${totalTrades} ${totalTrades === 1 ? "trade" : "trades"}`;
+      const trades = getSavedTrades();
+      trades.push(newTrade);
+      saveTrades(trades);
 
       paperTradeForm.reset();
+      renderTrades();
     });
+
+    renderTrades();
   </script>
 </body>
 </html>
