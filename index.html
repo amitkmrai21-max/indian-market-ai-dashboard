@@ -1,0 +1,1309 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Indian Market AI Dashboard for personal research and paper trading." />
+  <title>Indian Market AI Dashboard</title>
+
+  <style>
+    :root {
+      --bg: #07111f;
+      --panel: #0c1b2e;
+      --panel-2: #10243d;
+      --border: #1d3655;
+      --text: #edf5ff;
+      --muted: #93a9c3;
+      --blue: #45b6ff;
+      --green: #36cf83;
+      --red: #ff6f7d;
+      --yellow: #f7c948;
+      --shadow: 0 18px 45px rgba(0, 0, 0, 0.28);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(36, 126, 190, 0.18), transparent 34%),
+        radial-gradient(circle at bottom left, rgba(38, 190, 136, 0.1), transparent 28%),
+        var(--bg);
+      color: var(--text);
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app-shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 250px 1fr;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 24px 16px;
+      border-right: 1px solid var(--border);
+      background: rgba(7, 17, 31, 0.9);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 10px 28px;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 11px;
+      color: #ffffff;
+      background: linear-gradient(135deg, #17a2ff, #30d690);
+      font-weight: 800;
+      box-shadow: 0 10px 25px rgba(23, 162, 255, 0.22);
+    }
+
+    .brand-text strong,
+    .brand-text span {
+      display: block;
+    }
+
+    .brand-text strong {
+      font-size: 15px;
+      letter-spacing: 0.2px;
+    }
+
+    .brand-text span {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .nav-label {
+      margin: 18px 10px 8px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .nav-button {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      margin: 4px 0;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      color: var(--muted);
+      background: transparent;
+      text-align: left;
+      transition: 0.2s ease;
+    }
+
+    .nav-button:hover,
+    .nav-button.active {
+      color: var(--text);
+      border-color: rgba(69, 182, 255, 0.24);
+      background: rgba(69, 182, 255, 0.1);
+    }
+
+    .nav-icon {
+      width: 20px;
+      text-align: center;
+      color: var(--blue);
+    }
+
+    .sidebar-note {
+      position: absolute;
+      right: 16px;
+      bottom: 20px;
+      left: 16px;
+      padding: 14px;
+      border: 1px solid rgba(247, 201, 72, 0.22);
+      border-radius: 12px;
+      color: #ecd690;
+      background: rgba(247, 201, 72, 0.07);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .content {
+      min-width: 0;
+      padding: 28px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 26px;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.1px;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(25px, 3vw, 36px);
+      line-height: 1.15;
+    }
+
+    .subtitle {
+      margin: 9px 0 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .refresh-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-width: max-content;
+      padding: 10px 13px;
+      border: 1px solid rgba(54, 207, 131, 0.24);
+      border-radius: 999px;
+      color: #a9f0c8;
+      background: rgba(54, 207, 131, 0.08);
+      font-size: 13px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 5px rgba(54, 207, 131, 0.1);
+    }
+
+    .gemini-button {
+      min-height: 40px;
+      padding: 10px 14px;
+      border: 1px solid rgba(69, 182, 255, 0.42);
+      border-radius: 10px;
+      color: #eaf7ff;
+      background: rgba(69, 182, 255, 0.16);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .gemini-button:hover {
+      background: rgba(69, 182, 255, 0.28);
+    }
+
+    .gemini-button.active {
+      border-color: rgba(54, 207, 131, 0.46);
+      color: #c5f8d9;
+      background: rgba(54, 207, 131, 0.14);
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(12, 27, 46, 0.88);
+      box-shadow: var(--shadow);
+    }
+
+    .stat-card {
+      min-height: 138px;
+      padding: 18px;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .stat-value {
+      margin-top: 14px;
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.4px;
+    }
+
+    .stat-change {
+      display: inline-flex;
+      margin-top: 8px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .positive {
+      color: var(--green);
+    }
+
+    .negative {
+      color: var(--red);
+    }
+
+    .neutral {
+      color: var(--yellow);
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.8fr);
+      gap: 18px;
+    }
+
+    .section-card {
+      padding: 20px;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 15px;
+      margin-bottom: 18px;
+    }
+
+    .section-heading h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .section-heading p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .tag {
+      padding: 6px 9px;
+      border: 1px solid rgba(69, 182, 255, 0.22);
+      border-radius: 999px;
+      color: #9bd6ff;
+      background: rgba(69, 182, 255, 0.08);
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .chart-placeholder {
+      min-height: 285px;
+      overflow: hidden;
+      position: relative;
+      display: grid;
+      align-items: end;
+      padding: 22px;
+      border: 1px dashed rgba(69, 182, 255, 0.26);
+      border-radius: 12px;
+      background:
+        linear-gradient(rgba(29, 54, 85, 0.35) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(29, 54, 85, 0.35) 1px, transparent 1px),
+        rgba(16, 36, 61, 0.42);
+      background-size: 42px 42px;
+    }
+
+    .line-chart {
+      position: relative;
+      height: 176px;
+      border-bottom: 2px solid rgba(69, 182, 255, 0.8);
+      border-radius: 0 0 50% 0;
+      transform: skewY(-9deg);
+      box-shadow: 0 12px 0 -9px rgba(54, 207, 131, 0.82);
+    }
+
+    .chart-note {
+      position: absolute;
+      top: 18px;
+      left: 18px;
+      max-width: 290px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .market-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .market-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px;
+      border: 1px solid rgba(29, 54, 85, 0.8);
+      border-radius: 11px;
+      background: rgba(16, 36, 61, 0.48);
+    }
+
+    .market-name {
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .market-meta {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .market-price {
+      text-align: right;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .signal-box {
+      padding: 16px;
+      border: 1px solid rgba(54, 207, 131, 0.18);
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(54, 207, 131, 0.1), rgba(69, 182, 255, 0.06));
+    }
+
+    .signal-title {
+      margin: 0 0 8px;
+      color: #b9f5d1;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .signal-box p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .technical-engine-section {
+      margin-top: 18px;
+      margin-bottom: 18px;
+    }
+
+    .technical-engine-heading {
+      align-items: center;
+    }
+
+    .engine-summary {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .engine-summary strong {
+      color: var(--text);
+    }
+
+    .engine-layout {
+      display: grid;
+      grid-template-columns: minmax(250px, 0.72fr) minmax(0, 1.6fr);
+      gap: 18px;
+    }
+
+    .engine-score-card,
+    .engine-checks-card {
+      padding: 20px;
+    }
+
+    .engine-score-card h3,
+    .engine-checks-card h3,
+    .engine-rule-card h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .engine-score {
+      margin: 16px 0 4px;
+      color: var(--yellow);
+      font-size: 46px;
+      font-weight: 800;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .engine-score span {
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .engine-score-note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .engine-levels {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .engine-levels div {
+      padding: 11px;
+      border: 1px solid rgba(29, 54, 85, 0.85);
+      border-radius: 9px;
+      background: rgba(16, 36, 61, 0.42);
+    }
+
+    .engine-levels span,
+    .engine-rule-label {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.45px;
+      text-transform: uppercase;
+    }
+
+    .engine-levels strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 13px;
+    }
+
+    .engine-checks-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 15px;
+    }
+
+    .engine-checks-head p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .engine-check-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 9px;
+    }
+
+    .engine-check {
+      padding: 11px;
+      border: 1px solid rgba(29, 54, 85, 0.82);
+      border-radius: 9px;
+      background: rgba(16, 36, 61, 0.42);
+    }
+
+    .engine-check span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .engine-check strong {
+      display: block;
+      margin-top: 5px;
+      font-size: 13px;
+    }
+
+    .neutral-check strong {
+      color: var(--yellow);
+    }
+
+    .bearish-check strong {
+      color: var(--red);
+    }
+
+    .bullish-check strong {
+      color: var(--green);
+    }
+
+    .engine-rules-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .engine-rule-card {
+      padding: 18px;
+    }
+
+    .engine-rule-card h3 {
+      margin-top: 7px;
+    }
+
+    .engine-rule-card ul {
+      margin: 12px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .bullish-rule {
+      background: linear-gradient(135deg, rgba(54, 207, 131, 0.1), rgba(12, 27, 46, 0.88));
+    }
+
+    .bullish-rule .engine-rule-label {
+      color: #a9f0c8;
+    }
+
+    .bearish-rule {
+      background: linear-gradient(135deg, rgba(255, 111, 125, 0.1), rgba(12, 27, 46, 0.88));
+    }
+
+    .bearish-rule .engine-rule-label {
+      color: #ffc0c7;
+    }
+
+    .wait-rule {
+      background: linear-gradient(135deg, rgba(247, 201, 72, 0.1), rgba(12, 27, 46, 0.88));
+    }
+
+    .wait-rule .engine-rule-label {
+      color: #ecd690;
+    }
+
+    .market-research-section {
+      margin-top: 18px;
+    }
+
+    .research-section-heading {
+      margin-bottom: 14px;
+    }
+
+    .market-research-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .market-research-card {
+      padding: 20px;
+    }
+
+    .market-research-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .market-research-top h3 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .research-price {
+      margin-top: 10px;
+      font-size: 28px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .setup-status {
+      display: inline-flex;
+      align-items: center;
+      height: max-content;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(247, 201, 72, 0.12);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .ohlc-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 9px;
+      margin-bottom: 14px;
+    }
+
+    .ohlc-grid div {
+      padding: 10px;
+      border: 1px solid rgba(29, 54, 85, 0.85);
+      border-radius: 9px;
+      background: rgba(16, 36, 61, 0.42);
+    }
+
+    .ohlc-grid span,
+    .level-row span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+
+    .ohlc-grid strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 13px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .level-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 11px 0;
+      border-top: 1px solid rgba(29, 54, 85, 0.72);
+    }
+
+    .level-row strong {
+      font-size: 13px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .research-summary {
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 10px;
+      background: rgba(69, 182, 255, 0.07);
+    }
+
+    .research-summary strong {
+      font-size: 13px;
+    }
+
+    .research-summary p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .research-metrics {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .research-metric {
+      padding: 12px;
+      border: 1px solid rgba(29, 54, 85, 0.85);
+      border-radius: 10px;
+      background: rgba(16, 36, 61, 0.45);
+    }
+
+    .research-metric span {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+
+    .research-metric strong {
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .research-rule {
+      margin-top: 10px;
+      padding: 11px 12px;
+      border-radius: 9px;
+      color: var(--muted);
+      background: rgba(69, 182, 255, 0.07);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .research-rule strong {
+      color: var(--text);
+    }
+
+    .research-list {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .index-hero {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 18px;
+      align-items: center;
+      padding: 22px;
+      margin-bottom: 18px;
+    }
+
+    .index-title {
+      margin: 0;
+      font-size: 25px;
+    }
+
+    .index-value {
+      margin: 10px 0 0;
+      font-size: 35px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .setup-badge {
+      padding: 10px 12px;
+      border-radius: 10px;
+      color: #bdf7d5;
+      background: rgba(54, 207, 131, 0.12);
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .paper-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr);
+      gap: 18px;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    input,
+    select {
+      width: 100%;
+      margin-top: 6px;
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      outline: none;
+      color: var(--text);
+      background: rgba(16, 36, 61, 0.8);
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(69, 182, 255, 0.12);
+    }
+
+    .primary-button {
+      margin-top: 4px;
+      padding: 12px 14px;
+      border: 0;
+      border-radius: 9px;
+      color: #052033;
+      background: var(--blue);
+      font-weight: 800;
+    }
+
+    .primary-button:hover {
+      filter: brightness(1.08);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      min-width: 640px;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th,
+    td {
+      padding: 13px 10px;
+      border-bottom: 1px solid rgba(29, 54, 85, 0.8);
+      text-align: left;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 0.7px;
+      text-transform: uppercase;
+    }
+
+    td {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .delete-trade-button {
+      padding: 7px 10px;
+      border: 1px solid rgba(255, 111, 125, 0.35);
+      border-radius: 8px;
+      color: #ffc0c7;
+      background: rgba(255, 111, 125, 0.1);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .delete-trade-button:hover {
+      color: #ffffff;
+      background: rgba(255, 111, 125, 0.22);
+    }
+
+    .empty-note {
+      padding: 16px;
+      border: 1px dashed rgba(147, 169, 195, 0.28);
+      border-radius: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    @media (max-width: 1050px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .dashboard-grid,
+      .paper-grid,
+      .engine-layout,
+      .engine-rules-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .app-shell {
+        display: block;
+      }
+
+      .sidebar {
+        position: static;
+        height: auto;
+        padding: 14px;
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .brand {
+        padding-bottom: 12px;
+      }
+
+      .nav-label,
+      .sidebar-note {
+        display: none;
+      }
+
+      .nav {
+        display: flex;
+        gap: 7px;
+        overflow-x: auto;
+      }
+
+      .nav-button {
+        width: auto;
+        min-width: max-content;
+        margin: 0;
+      }
+
+      .content {
+        padding: 18px 14px 28px;
+      }
+
+      .topbar,
+      .index-hero {
+        display: block;
+      }
+
+      .top-actions {
+        justify-content: flex-start;
+        margin-top: 14px;
+      }
+
+      .stats-grid,
+      .market-research-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .engine-check-grid,
+      .research-metrics {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">IM</div>
+        <div class="brand-text">
+          <strong>Indian Market AI</strong>
+          <span>Research Dashboard</span>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="Main navigation">
+        <p class="nav-label">Workspace</p>
+
+        <button class="nav-button active" data-page="dashboard" type="button">
+          <span class="nav-icon">◫</span>
+          Dashboard
+        </button>
+
+        <button class="nav-button" data-page="nifty" type="bu
+
+        <section class="technical-engine-section">
+          <div class="section-heading technical-engine-heading">
+            <div>
+              <h2>Technical Confluence Engine</h2>
+              <p>10 checks combined for personal research. Not an order instruction.</p>
+            </div>
+
+            <div class="engine-summary">
+              <span class="setup-status neutral">Neutral</span>
+              <strong>Grade C</strong>
+              <span>4 / 10 aligned</span>
+            </div>
+          </div>
+
+          <div class="engine-layout">
+            <article class="card engine-score-card">
+              <p class="eyebrow">Current research state</p>
+              <h3>Wait for confirmation</h3>
+              <div class="engine-score">4<span>/10</span></div>
+
+              <p class="engine-score-note">
+                Trend and level structure are not fully aligned. Avoid forcing a paper trade.
+              </p>
+
+              <div class="engine-levels">
+                <div>
+                  <span>NIFTY trigger</span>
+                  <strong>Above 24,800 / below 24,580</strong>
+                </div>
+
+                <div>
+                  <span>Bank Nifty trigger</span>
+                  <strong>Above 55,320 / below 54,880</strong>
+                </div>
+              </div>
+            </article>
+
+            <article class="card engine-checks-card">
+              <div class="engine-checks-head">
+                <div>
+                  <h3>10-Check Scorecard</h3>
+                  <p>Demo values until live candle data is connected.</p>
+                </div>
+                <span class="tag">15m · 1h · 1D</span>
+              </div>
+
+              <div class="engine-check-grid">
+                <div class="engine-check neutral-check">
+                  <span>EMA 9 / 20 / 50</span>
+                  <strong>Mixed</strong>
+                </div>
+
+                <div class="engine-check neutral-check">
+                  <span>EMA 200 filter</span>
+                  <strong>Neutral</strong>
+                </div>
+
+                <div class="engine-check neutral-check">
+                  <span>RSI 14</span>
+                  <strong>48.6 · Neutral</strong>
+                </div>
+
+                <div class="engine-check bearish-check">
+                  <span>MACD</span>
+                  <strong>Bearish momentum</strong>
+                </div>
+
+                <div class="engine-check neutral-check">
+                  <span>Relative volume</span>
+                  <strong>0.84x · Weak</strong>
+                </div>
+
+                <div class="engine-check neutral-check">
+                  <span>VWAP position</span>
+                  <strong>Near VWAP</strong>
+                </div>
+
+                <div class="engine-check neutral-check">
+                  <span>ADX 14</span>
+                  <strong>18.9 · No trend</strong>
+                </div>
+
+                <div class="engine-check neutral-check">
+                  <span>ATR 14</span>
+                  <strong>Normal volatility</strong>
+                </div>
+
+                <div class="engine-check neutral-check">
+                  <span>Price structure</span>
+                  <strong>Range-bound</strong>
+                </div>
+
+                <div class="engine-check neutral-check">
+                  <span>Timeframe alignment</span>
+                  <strong>Conflicting</strong>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <div class="engine-rules-grid">
+            <article class="card engine-rule-card bullish-rule">
+              <span class="engine-rule-label">Bullish research setup</span>
+              <h3>What must confirm</h3>
+              <ul>
+                <li>Price closes above resistance.</li>
+                <li>Relative volume is above 1.20x.</li>
+                <li>RSI moves above 50 and MACD improves.</li>
+                <li>Price holds above VWAP with defined risk.</li>
+              </ul>
+            </article>
+
+            <article class="card engine-rule-card bearish-rule">
+              <span class="engine-rule-label">Bearish research setup</span>
+              <h3>What must confirm</h3>
+              <ul>
+                <li>Price closes below support.</li>
+                <li>Relative volume is above 1.20x.</li>
+                <li>RSI weakens below 50 and MACD remains negative.</li>
+                <li>Price stays below VWAP with defined invalidation.</li>
+              </ul>
+            </article>
+
+            <article class="card engine-rule-card wait-rule">
+              <span class="engine-rule-label">No-trade filter</span>
+              <h3>Wait when</h3>
+              <ul>
+                <li>ADX is below 20 and price is choppy.</li>
+                <li>Volume is weak at a breakout or breakdown level.</li>
+                <li>15m, 1h, and daily directions conflict.</li>
+                <li>Paper-trade risk/reward is below 1:1.5.</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <section class="market-research-section">
+          <div class="section-heading research-section-heading">
+            <div>
+              <h2>Market Research Snapshot</h2>
+              <p>Demo levels for personal research — refresh these manually before paper-trading decisions.</p>
+            </div>
+            <span class="tag">Research mode</span>
+          </div>
+
+          <div class="market-research-grid">
+            <article class="card market-research-card">
+              <div class="market-research-top">
+                <div>
+                  <p class="eyebrow">Broad Market Index</p>
+                  <h3>NIFTY 50</h3>
+                  <div class="research-price">24,680.55</div>
+                  <div class="stat-change positive">▲ +0.62% · Demo</div>
+                </div>
+                <span class="setup-status neutral">Neutral</span>
+              </div>
+
+              <div class="ohlc-grid">
+                <div><span>Open</span><strong>24,540.20</strong></div>
+                <div><span>High</span><strong>24,720.40</strong></div>
+                <div><span>Low</span><strong>24,510.80</strong></div>
+                <div><span>Prev. close</span><strong>24,528.45</strong></div>
+              </div>
+
+              <div class="level-row">
+                <span>Support</span>
+                <strong>24,580 – 24,620</strong>
+              </div>
+
+              <div class="level-row">
+                <span>Resistance</span>
+                <strong>24,740 – 24,800</strong>
+              </div>
+
+              <div class="research-summary">
+                <strong>Grade C · Wait for confirmation</strong>
+                <p>Consider a paper-trade plan only after a confirmed breakout or breakdown with defined risk.</p>
+              </div>
+            </article>
+
+            <article class="card market-research-card">
+              <div class="market-research-top">
+                <div>
+                  <p class="eyebrow">Banking Sector Index</p>
+                  <h3>Bank Nifty</h3>
+                  <div class="research-price">55,112.40</div>
+                  <div class="stat-change positive">▲ +0.41% · Demo</div>
+                </div>
+                <span class="setup-status neutral">Neutral</span>
+              </div>
+
+              <div class="ohlc-grid">
+                <div><span>Open</span><strong>54,890.75</strong></div>
+                <div><span>High</span><strong>55,220.10</strong></div>
+                <div><span>Low</span><strong>54,820.30</strong></div>
+                <div><span>Prev. close</span><strong>54,886.80</strong></div>
+              </div>
+
+              <div class="level-row">
+                <span>Support</span>
+                <strong>54,880 – 54,960</strong>
+              </div>
+
+              <div class="level-row">
+                <span>Resistance</span>
+                <strong>55,220 – 55,320</strong>
+              </div>
+
+              <div class="research-summary">
+                <strong>Grade C · Wait for confirmation</strong>
+                <p>Bank Nifty can move fast. Define invalidation and risk before recording any paper trade.</p>
+              </div>
+            </article>
+          </div>
+        </section>
+      </section>
+
+      <section class="page" id="nifty">
+        <article class="card index-hero">
+          <div>
+            <p class="eyebrow">Index Research</p>
+            <h2 class="index-title">NIFTY 50</h2>
+            <div class="index-value">24,680.55</div>
+            <p class="subtitle">Demo index value · Replace with permitted market data later.</p>
+          </div>
+          <div class="setup-badge">Neutral — wait for confirmation</div>
+        </article>
+
+        <div class="dashboard-grid">
+          <article class="card section-card">
+            <div class="section-heading">
+              <div>
+                <h2>NIFTY 50 Chart Area</h2>
+                <p>Future: 15m, 1h, and daily research views.</p>
+              </div>
+              <span class="tag">NIFTY 50</span>
+            </div>
+
+            <div class="chart-placeholder">
+              <div class="chart-note">
+                Future indicators can include EMA trend, RSI, support/resistance, volume context,
+                and setup-grade checks.
+              </div>
+              <div class="line-chart"></div>
+            </div>
+          </article>
+
+          <div class="market-list">
+            <article class="card section-card">
+              <div class="section-heading">
+                <div>
+                  <h2>Setup Research Panel</h2>
+                  <p>Demo research framework — not an order instruction.</p>
+                </div>
+                <span class="tag neutral">Grade C</span>
+              </div>
+
+              <div class="research-metrics">
+                <div class="research-metric">
+                  <span>Setup direction</span>
+                  <strong class="neutral">Neutral</strong>
+                </div>
+
+                <div class="research-metric">
+                  <span>Market state</span>
+                  <strong>Wait for confirmation</strong>
+                </div>
+
+                <div class="research-metric">
+                  <span>Support zone</span>
+                  <strong>24,580 – 24,620</strong>
+                </div>
+
+                <div class="research-metric">
+                  <span>Resistance zone</span>
+                  <strong>24,740 – 24,800</strong>
+                </div>
+              </div>
+
+              <div class="research-rule">
+                <strong>Bullish paper-trade condition:</strong>
+                Wait for a strong candle close above 24,800 and define risk before logging a paper trade.
+              </div>
+
+              <div class="research-rule">
+                <strong>Bearish paper-trade condition:</strong>
+                Wait for a sustained move below 24,580 with confirmation and a defined stop loss.
+              </div>
+            </article>
+
+            <article class="card section-card">
+              <div class="section-heading">
+                <div>
+                  <h2>Research Checklist</h2>
+                  <p>Manual confirmation before any paper trade.</p>
+                </div>
+              </div>
+
+              <ul class="research-list">
+                <li>Check overall trend and market structure.</li>
+                <li>Mark support, resistance, and invalidation level.</li>
+                <li>Wait for a candle-close confirmation.</li>
+                <li>Define a paper-trade stop loss before entry.</li>
+                <li>Record why the setup was taken.</li>
+              </ul>
+            </article>
+          </div>
+        </div>
+      </section>
