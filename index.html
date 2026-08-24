@@ -1,0 +1,996 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta
+    name="description"
+    content="Indian Market AI Dashboard for personal research and paper trading."
+  />
+  <title>Indian Market AI Dashboard</title>
+
+  <style>
+    :root {
+      --bg: #07111f;
+      --panel: #0c1b2e;
+      --panel-2: #10243d;
+      --border: #1d3655;
+      --text: #edf5ff;
+      --muted: #93a9c3;
+      --blue: #45b6ff;
+      --green: #36cf83;
+      --red: #ff6f7d;
+      --yellow: #f7c948;
+      --shadow: 0 18px 45px rgba(0, 0, 0, 0.28);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(36, 126, 190, 0.18), transparent 34%),
+        radial-gradient(circle at bottom left, rgba(38, 190, 136, 0.1), transparent 28%),
+        var(--bg);
+      color: var(--text);
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    .app-shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 250px 1fr;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 24px 16px;
+      border-right: 1px solid var(--border);
+      background: rgba(7, 17, 31, 0.9);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 10px 28px;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 11px;
+      color: white;
+      background: linear-gradient(135deg, #17a2ff, #30d690);
+      font-weight: 800;
+      box-shadow: 0 10px 25px rgba(23, 162, 255, 0.22);
+    }
+
+    .brand-text strong,
+    .brand-text span {
+      display: block;
+    }
+
+    .brand-text strong {
+      font-size: 15px;
+      letter-spacing: 0.2px;
+    }
+
+    .brand-text span {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .nav-label {
+      margin: 18px 10px 8px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .nav-button {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      margin: 4px 0;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      color: var(--muted);
+      background: transparent;
+      cursor: pointer;
+      text-align: left;
+      transition: 0.2s ease;
+    }
+
+    .nav-button:hover,
+    .nav-button.active {
+      color: var(--text);
+      border-color: rgba(69, 182, 255, 0.24);
+      background: rgba(69, 182, 255, 0.1);
+    }
+
+    .nav-icon {
+      width: 20px;
+      text-align: center;
+      color: var(--blue);
+    }
+
+    .sidebar-note {
+      position: absolute;
+      bottom: 20px;
+      left: 16px;
+      right: 16px;
+      padding: 14px;
+      border: 1px solid rgba(247, 201, 72, 0.22);
+      border-radius: 12px;
+      color: #ecd690;
+      background: rgba(247, 201, 72, 0.07);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .content {
+      min-width: 0;
+      padding: 28px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 26px;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.1px;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(25px, 3vw, 36px);
+      line-height: 1.15;
+    }
+
+    .subtitle {
+      margin: 9px 0 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .market-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: max-content;
+      padding: 10px 13px;
+      border: 1px solid rgba(54, 207, 131, 0.24);
+      border-radius: 999px;
+      color: #a9f0c8;
+      background: rgba(54, 207, 131, 0.08);
+      font-size: 13px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 5px rgba(54, 207, 131, 0.1);
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(12, 27, 46, 0.88);
+      box-shadow: var(--shadow);
+    }
+
+    .stat-card {
+      min-height: 138px;
+      padding: 18px;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .stat-value {
+      margin-top: 14px;
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.4px;
+    }
+
+    .stat-change {
+      display: inline-flex;
+      margin-top: 8px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .positive {
+      color: var(--green);
+    }
+
+    .negative {
+      color: var(--red);
+    }
+
+    .neutral {
+      color: var(--yellow);
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.8fr);
+      gap: 18px;
+    }
+
+    .section-card {
+      padding: 20px;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 15px;
+      margin-bottom: 18px;
+    }
+
+    .section-heading h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .section-heading p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .tag {
+      padding: 6px 9px;
+      border: 1px solid rgba(69, 182, 255, 0.22);
+      border-radius: 999px;
+      color: #9bd6ff;
+      background: rgba(69, 182, 255, 0.08);
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .chart-placeholder {
+      min-height: 285px;
+      overflow: hidden;
+      position: relative;
+      display: grid;
+      align-items: end;
+      padding: 22px;
+      border: 1px dashed rgba(69, 182, 255, 0.26);
+      border-radius: 12px;
+      background:
+        linear-gradient(rgba(29, 54, 85, 0.35) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(29, 54, 85, 0.35) 1px, transparent 1px),
+        rgba(16, 36, 61, 0.42);
+      background-size: 42px 42px;
+    }
+
+    .line-chart {
+      position: relative;
+      height: 176px;
+      border-bottom: 2px solid rgba(69, 182, 255, 0.8);
+      border-radius: 0 0 50% 0;
+      transform: skewY(-9deg);
+      box-shadow: 0 12px 0 -9px rgba(54, 207, 131, 0.82);
+    }
+
+    .chart-note {
+      position: absolute;
+      top: 18px;
+      left: 18px;
+      max-width: 290px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .market-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .market-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px;
+      border: 1px solid rgba(29, 54, 85, 0.8);
+      border-radius: 11px;
+      background: rgba(16, 36, 61, 0.48);
+    }
+
+    .market-name {
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .market-meta {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .market-price {
+      text-align: right;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .signal-box {
+      padding: 16px;
+      border: 1px solid rgba(54, 207, 131, 0.18);
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(54, 207, 131, 0.1), rgba(69, 182, 255, 0.06));
+    }
+
+    .signal-title {
+      margin: 0 0 8px;
+      color: #b9f5d1;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .signal-box p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .research-list {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .index-hero {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 18px;
+      align-items: center;
+      padding: 22px;
+      margin-bottom: 18px;
+    }
+
+    .index-title {
+      margin: 0;
+      font-size: 25px;
+    }
+
+    .index-value {
+      margin: 10px 0 0;
+      font-size: 35px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .setup-badge {
+      padding: 10px 12px;
+      border-radius: 10px;
+      color: #bdf7d5;
+      background: rgba(54, 207, 131, 0.12);
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .paper-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr);
+      gap: 18px;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    input,
+    select {
+      width: 100%;
+      margin-top: 6px;
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      outline: none;
+      color: var(--text);
+      background: rgba(16, 36, 61, 0.8);
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(69, 182, 255, 0.12);
+    }
+
+    .primary-button {
+      margin-top: 4px;
+      padding: 12px 14px;
+      border: 0;
+      border-radius: 9px;
+      color: #052033;
+      background: var(--blue);
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .primary-button:hover {
+      filter: brightness(1.08);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      min-width: 560px;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th,
+    td {
+      padding: 13px 10px;
+      border-bottom: 1px solid rgba(29, 54, 85, 0.8);
+      text-align: left;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 0.7px;
+      text-transform: uppercase;
+    }
+
+    td {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .empty-note {
+      padding: 16px;
+      border: 1px dashed rgba(147, 169, 195, 0.28);
+      border-radius: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    @media (max-width: 1050px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .dashboard-grid,
+      .paper-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .app-shell {
+        display: block;
+      }
+
+      .sidebar {
+        position: static;
+        height: auto;
+        padding: 14px;
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .brand {
+        padding-bottom: 12px;
+      }
+
+      .nav-label,
+      .sidebar-note {
+        display: none;
+      }
+
+      .nav {
+        display: flex;
+        gap: 7px;
+        overflow-x: auto;
+      }
+
+      .nav-button {
+        width: auto;
+        min-width: max-content;
+        margin: 0;
+      }
+
+      .content {
+        padding: 18px 14px 28px;
+      }
+
+      .topbar,
+      .index-hero {
+        display: block;
+      }
+
+      .market-status,
+      .setup-badge {
+        display: inline-flex;
+        margin-top: 14px;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">IM</div>
+        <div class="brand-text">
+          <strong>Indian Market AI</strong>
+          <span>Research Dashboard</span>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="Main navigation">
+        <p class="nav-label">Workspace</p>
+
+        <button class="nav-button active" data-page="dashboard" type="button">
+          <span class="nav-icon">◫</span>
+          Dashboard
+        </button>
+
+        <button class="nav-button" data-page="nifty" type="button">
+          <span class="nav-icon">N</span>
+          NIFTY 50
+        </button>
+
+        <button class="nav-button" data-page="banknifty" type="button">
+          <span class="nav-icon">B</span>
+          Bank Nifty
+        </button>
+
+        <p class="nav-label">Journal</p>
+
+        <button class="nav-button" data-page="paper-trading" type="button">
+          <span class="nav-icon">▣</span>
+          Paper Trading
+        </button>
+      </nav>
+
+      <div class="sidebar-note">
+        <strong>Research-only tool</strong><br />
+        No broker connection, no auto-trading, and no real-money order execution.
+      </div>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Personal Research Workspace</p>
+          <h1 id="page-title">Indian Market Overview</h1>
+          <p class="subtitle" id="page-subtitle">
+            NIFTY 50 and Bank Nifty research dashboard with paper-trading workflow.
+          </p>
+        </div>
+
+        <div class="market-status">
+          <span class="status-dot"></span>
+          Demo data mode
+        </div>
+      </header>
+
+      <section class="page active" id="dashboard">
+        <div class="stats-grid">
+          <article class="card stat-card">
+            <div class="stat-label">NIFTY 50</div>
+            <div class="stat-value">24,680.55</div>
+            <div class="stat-change positive">▲ +0.62% · Demo</div>
+          </article>
+
+          <article class="card stat-card">
+            <div class="stat-label">Bank Nifty</div>
+            <div class="stat-value">55,112.40</div>
+            <div class="stat-change positive">▲ +0.41% · Demo</div>
+          </article>
+
+          <article class="card stat-card">
+            <div class="stat-label">Market Bias</div>
+            <div class="stat-value">Neutral</div>
+            <div class="stat-change neutral">Wait for confirmation</div>
+          </article>
+
+          <article class="card stat-card">
+            <div class="stat-label">Paper Trades</div>
+            <div class="stat-value" id="trade-count">0</div>
+            <div class="stat-change neutral">Journal is ready</div>
+          </article>
+        </div>
+
+        <div class="dashboard-grid">
+          <article class="card section-card">
+            <div class="section-heading">
+              <div>
+                <h2>Market Trend Workspace</h2>
+                <p>Chart integration will be added after the dashboard structure is ready.</p>
+              </div>
+              <span class="tag">Demo chart</span>
+            </div>
+
+            <div class="chart-placeholder">
+              <div class="chart-note">
+                This placeholder represents the future NIFTY 50 / Bank Nifty technical chart area.
+                Next phases will add selected timeframe, trend indicators, and research notes.
+              </div>
+              <div class="line-chart"></div>
+            </div>
+          </article>
+
+          <div class="market-list">
+            <article class="card section-card">
+              <div class="section-heading">
+                <div>
+                  <h2>Index Snapshot</h2>
+                  <p>Sample values only</p>
+                </div>
+              </div>
+
+              <div class="market-list">
+                <div class="market-row">
+                  <div>
+                    <div class="market-name">NIFTY 50</div>
+                    <div class="market-meta">Broad market index</div>
+                  </div>
+                  <div>
+                    <div class="market-price">24,680.55</div>
+                    <div class="market-meta positive">+0.62%</div>
+                  </div>
+                </div>
+
+                <div class="market-row">
+                  <div>
+                    <div class="market-name">BANK NIFTY</div>
+                    <div class="market-meta">Banking sector index</div>
+                  </div>
+                  <div>
+                    <div class="market-price">55,112.40</div>
+                    <div class="market-meta positive">+0.41%</div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="card section-card">
+              <div class="signal-box">
+                <h2 class="signal-title">AI Research Note</h2>
+                <p>
+                  Use this area for setup explanation, key levels, invalidation logic, and
+                  confirmation checks. It is not an order instruction.
+                </p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="nifty">
+        <article class="card index-hero">
+          <div>
+            <p class="eyebrow">Index Research</p>
+            <h2 class="index-title">NIFTY 50</h2>
+            <div class="index-value">24,680.55</div>
+            <p class="subtitle">Demo index value · Replace with permitted market data later.</p>
+          </div>
+          <div class="setup-badge">Neutral — wait for confirmation</div>
+        </article>
+
+        <div class="dashboard-grid">
+          <article class="card section-card">
+            <div class="section-heading">
+              <div>
+                <h2>NIFTY 50 Chart Area</h2>
+                <p>Future: 15m, 1h, and daily research views.</p>
+              </div>
+              <span class="tag">NIFTY 50</span>
+            </div>
+            <div class="chart-placeholder">
+              <div class="chart-note">
+                Future indicators can include EMA trend, RSI, support/resistance, volume context,
+                and setup-grade checks.
+              </div>
+              <div class="line-chart"></div>
+            </div>
+          </article>
+
+          <article class="card section-card">
+            <div class="section-heading">
+              <div>
+                <h2>Research Checklist</h2>
+                <p>Manual confirmation before any paper trade.</p>
+              </div>
+            </div>
+            <ul class="research-list">
+              <li>Check overall trend and market structure.</li>
+              <li>Mark support, resistance, and invalidation level.</li>
+              <li>Wait for a candle-close confirmation.</li>
+              <li>Define a paper-trade stop loss before entry.</li>
+              <li>Record why the setup was taken.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="page" id="banknifty">
+        <article class="card index-hero">
+          <div>
+            <p class="eyebrow">Index Research</p>
+            <h2 class="index-title">Bank Nifty</h2>
+            <div class="index-value">55,112.40</div>
+            <p class="subtitle">Demo index value · Replace with permitted market data later.</p>
+          </div>
+          <div class="setup-badge">Neutral — wait for confirmation</div>
+        </article>
+
+        <div class="dashboard-grid">
+          <article class="card section-card">
+            <div class="section-heading">
+              <div>
+                <h2>Bank Nifty Chart Area</h2>
+                <p>Future: trend, volatility, and key bank-stock context.</p>
+              </div>
+              <span class="tag">Bank Nifty</span>
+            </div>
+            <div class="chart-placeholder">
+              <div class="chart-note">
+                Bank Nifty can move quickly. Every paper trade should include a pre-defined
+                risk level and invalidation condition.
+              </div>
+              <div class="line-chart"></div>
+            </div>
+          </article>
+
+          <article class="card section-card">
+            <div class="section-heading">
+              <div>
+                <h2>Research Checklist</h2>
+                <p>Keep decision-making repeatable.</p>
+              </div>
+            </div>
+            <ul class="research-list">
+              <li>Check index trend across selected timeframes.</li>
+              <li>Review major support and resistance zones.</li>
+              <li>Mark entry trigger only after confirmation.</li>
+              <li>Set risk and target before logging the trade.</li>
+              <li>Write post-trade learning notes.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="page" id="paper-trading">
+        <div class="paper-grid">
+          <article class="card section-card">
+            <div class="section-heading">
+              <div>
+                <h2>Add Paper Trade</h2>
+                <p>Stores only in the current browser session for now.</p>
+              </div>
+            </div>
+
+            <form id="paper-trade-form" class="form-grid">
+              <label>
+                Index
+                <select id="trade-index" required>
+                  <option value="NIFTY 50">NIFTY 50</option>
+                  <option value="Bank Nifty">Bank Nifty</option>
+                </select>
+              </label>
+
+              <label>
+                Direction
+                <select id="trade-direction" required>
+                  <option value="Long">Long / Bullish setup</option>
+                  <option value="Short">Short / Bearish setup</option>
+                </select>
+              </label>
+
+              <label>
+                Entry price
+                <input id="trade-entry" type="number" step="0.01" placeholder="Example: 24680.55" required />
+              </label>
+
+              <label>
+                Stop loss
+                <input id="trade-stop" type="number" step="0.01" placeholder="Example: 24620.00" required />
+              </label>
+
+              <label>
+                Research note
+                <input id="trade-note" type="text" placeholder="Example: Breakout confirmation" required />
+              </label>
+
+              <button class="primary-button" type="submit">Add Paper Trade</button>
+            </form>
+          </article>
+
+          <article class="card section-card">
+            <div class="section-heading">
+              <div>
+                <h2>Paper Trade Journal</h2>
+                <p>Demo journal — no real order is sent anywhere.</p>
+              </div>
+              <span class="tag" id="journal-count">0 trades</span>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Index</th>
+                    <th>Direction</th>
+                    <th>Entry</th>
+                    <th>Stop</th>
+                    <th>Research note</th>
+                  </tr>
+                </thead>
+                <tbody id="trade-table-body">
+                  <tr id="empty-row">
+                    <td colspan="5">
+                      <div class="empty-note">
+                        No paper trades yet. Add one on the left after defining your research
+                        setup, risk level, and reason for entry.
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const pageTitles = {
+      dashboard: {
+        title: "Indian Market Overview",
+        subtitle: "NIFTY 50 and Bank Nifty research dashboard with paper-trading workflow."
+      },
+      nifty: {
+        title: "NIFTY 50 Research",
+        subtitle: "Track market structure, levels, and paper-trading preparation."
+      },
+      banknifty: {
+        title: "Bank Nifty Research",
+        subtitle: "Track trend, volatility context, and structured paper-trade ideas."
+      },
+      "paper-trading": {
+        title: "Paper Trading Journal",
+        subtitle: "Record research setups without any real-money order execution."
+      }
+    };
+
+    const navButtons = document.querySelectorAll(".nav-button");
+    const pages = document.querySelectorAll(".page");
+    const pageTitle = document.getElementById("page-title");
+    const pageSubtitle = document.getElementById("page-subtitle");
+
+    navButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const pageId = button.dataset.page;
+
+        navButtons.forEach((item) => item.classList.remove("active"));
+        pages.forEach((page) => page.classList.remove("active"));
+
+        button.classList.add("active");
+        document.getElementById(pageId).classList.add("active");
+
+        pageTitle.textContent = pageTitles[pageId].title;
+        pageSubtitle.textContent = pageTitles[pageId].subtitle;
+      });
+    });
+
+    const paperTradeForm = document.getElementById("paper-trade-form");
+    const tradeTableBody = document.getElementById("trade-table-body");
+    const tradeCount = document.getElementById("trade-count");
+    const journalCount = document.getElementById("journal-count");
+    let totalTrades = 0;
+
+    paperTradeForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const indexName = document.getElementById("trade-index").value;
+      const direction = document.getElementById("trade-direction").value;
+      const entry = document.getElementById("trade-entry").value;
+      const stop = document.getElementById("trade-stop").value;
+      const note = document.getElementById("trade-note").value.trim();
+      const emptyRow = document.getElementById("empty-row");
+
+      if (emptyRow) {
+        emptyRow.remove();
+      }
+
+      const row = document.createElement("tr");
+      const directionClass = direction === "Long" ? "positive" : "negative";
+
+      row.innerHTML = `
+        <td>${indexName}</td>
+        <td class="${directionClass}">${direction}</td>
+        <td>${Number(entry).toLocaleString("en-IN")}</td>
+        <td>${Number(stop).toLocaleString("en-IN")}</td>
+        <td>${note}</td>
+      `;
+
+      tradeTableBody.appendChild(row);
+
+      totalTrades += 1;
+      tradeCount.textContent = totalTrades;
+      journalCount.textContent = `${totalTrades} ${totalTrades === 1 ? "trade" : "trades"}`;
+
+      paperTradeForm.reset();
+    });
+  </script>
+</body>
+</html>
