@@ -300,6 +300,122 @@
       white-space: nowrap;
     }
 
+    .market-research-section {
+  margin-top: 18px;
+}
+
+.research-section-heading {
+  margin-bottom: 14px;
+}
+
+.market-research-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.market-research-card {
+  padding: 20px;
+}
+
+.market-research-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.market-research-top h3 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.research-price {
+  margin-top: 10px;
+  font-size: 28px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.setup-status {
+  display: inline-flex;
+  align-items: center;
+  height: max-content;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgba(247, 201, 72, 0.12);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.ohlc-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  margin-bottom: 14px;
+}
+
+.ohlc-grid div {
+  padding: 10px;
+  border: 1px solid rgba(29, 54, 85, 0.85);
+  border-radius: 9px;
+  background: rgba(16, 36, 61, 0.42);
+}
+
+.ohlc-grid span,
+.level-row span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.ohlc-grid strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.level-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 11px 0;
+  border-top: 1px solid rgba(29, 54, 85, 0.72);
+}
+
+.level-row strong {
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.research-summary {
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 10px;
+  background: rgba(69, 182, 255, 0.07);
+}
+
+.research-summary strong {
+  font-size: 13px;
+}
+
+.research-summary p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+@media (max-width: 760px) {
+  .market-research-grid {
+    grid-template-columns: 1fr;
+  }
+}
     .chart-placeholder {
       min-height: 285px;
       overflow: hidden;
@@ -797,6 +913,85 @@
         </div>
       </section>
 
+              <section class="market-research-section">
+          <div class="section-heading research-section-heading">
+            <div>
+              <h2>Market Research Snapshot</h2>
+              <p>Demo levels for personal research — refresh these manually before paper-trading decisions.</p>
+            </div>
+            <span class="tag">Research mode</span>
+          </div>
+
+          <div class="market-research-grid">
+            <article class="card market-research-card">
+              <div class="market-research-top">
+                <div>
+                  <p class="eyebrow">Broad Market Index</p>
+                  <h3>NIFTY 50</h3>
+                  <div class="research-price">24,680.55</div>
+                  <div class="stat-change positive">▲ +0.62% · Demo</div>
+                </div>
+                <span class="setup-status neutral">Neutral</span>
+              </div>
+
+              <div class="ohlc-grid">
+                <div><span>Open</span><strong>24,540.20</strong></div>
+                <div><span>High</span><strong>24,720.40</strong></div>
+                <div><span>Low</span><strong>24,510.80</strong></div>
+                <div><span>Prev. close</span><strong>24,528.45</strong></div>
+              </div>
+
+              <div class="level-row">
+                <span>Support</span>
+                <strong>24,580 – 24,620</strong>
+              </div>
+
+              <div class="level-row">
+                <span>Resistance</span>
+                <strong>24,740 – 24,800</strong>
+              </div>
+
+              <div class="research-summary">
+                <strong>Grade C · Wait for confirmation</strong>
+                <p>Consider a paper-trade plan only after a confirmed breakout or breakdown with defined risk.</p>
+              </div>
+            </article>
+
+            <article class="card market-research-card">
+              <div class="market-research-top">
+                <div>
+                  <p class="eyebrow">Banking Sector Index</p>
+                  <h3>Bank Nifty</h3>
+                  <div class="research-price">55,112.40</div>
+                  <div class="stat-change positive">▲ +0.41% · Demo</div>
+                </div>
+                <span class="setup-status neutral">Neutral</span>
+              </div>
+
+              <div class="ohlc-grid">
+                <div><span>Open</span><strong>54,890.75</strong></div>
+                <div><span>High</span><strong>55,220.10</strong></div>
+                <div><span>Low</span><strong>54,820.30</strong></div>
+                <div><span>Prev. close</span><strong>54,886.80</strong></div>
+              </div>
+
+              <div class="level-row">
+                <span>Support</span>
+                <strong>54,880 – 54,960</strong>
+              </div>
+
+              <div class="level-row">
+                <span>Resistance</span>
+                <strong>55,220 – 55,320</strong>
+              </div>
+
+              <div class="research-summary">
+                <strong>Grade C · Wait for confirmation</strong>
+                <p>Bank Nifty can move fast. Define invalidation and risk before recording any paper trade.</p>
+              </div>
+            </article>
+          </div>
+        </section>
       <section class="page" id="nifty">
         <article class="card index-hero">
           <div>
