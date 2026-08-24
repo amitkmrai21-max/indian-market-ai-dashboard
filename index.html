@@ -389,6 +389,54 @@
       line-height: 1.6;
     }
 
+    .research-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.research-metric {
+  padding: 12px;
+  border: 1px solid rgba(29, 54, 85, 0.85);
+  border-radius: 10px;
+  background: rgba(16, 36, 61, 0.45);
+}
+
+.research-metric span {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.research-metric strong {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.research-rule {
+  margin-top: 10px;
+  padding: 11px 12px;
+  border-radius: 9px;
+  color: var(--muted);
+  background: rgba(69, 182, 255, 0.07);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.research-rule strong {
+  color: var(--text);
+}
+
+@media (max-width: 520px) {
+  .research-metrics {
+    grid-template-columns: 1fr;
+  }
+}
     .research-list {
       margin: 0;
       padding-left: 18px;
@@ -778,6 +826,88 @@
             </div>
           </article>
 
+          <article class="card section-card">
+  <div class="section-heading">
+    <div>
+      <h2>Setup Research Panel</h2>
+      <p>Demo research framework — not an order instruction.</p>
+    </div>
+    <span class="tag neutral">Grade C</span>
+  </div>
+
+  <div class="research-metrics">
+    <div class="research-metric">
+      <span>Setup direction</span>
+      <strong class="neutral">Neutral</strong>
+    </div>
+
+    <div class="research-metric">
+      <span>Market state</span>
+      <strong>Wait for confirmation</strong>
+    </div>
+
+    <div class="research-metric">
+      <span>Support zone</span>
+      <strong>24,580 – 24,620</strong>
+    </div>
+
+    <div class="research-metric">
+      <span>Resistance zone</span>
+      <strong>24,740 – 24,800</strong>
+    </div>
+  </div>
+
+  <div class="research-rule">
+    <strong>Bullish paper-trade condition:</strong>
+    Wait for a strong candle close above 24,800 and define risk before logging a paper trade.
+  </div>
+
+  <div class="research-rule">
+    <strong>Bearish paper-trade condition:</strong>
+    Wait for a sustained move below 24,580 with confirmation and a defined stop loss.
+  </div>
+</article>
+         <article class="card section-card">
+  <div class="section-heading">
+    <div>
+      <h2>Setup Research Panel</h2>
+      <p>Demo research framework — not an order instruction.</p>
+    </div>
+    <span class="tag neutral">Grade C</span>
+  </div>
+
+  <div class="research-metrics">
+    <div class="research-metric">
+      <span>Setup direction</span>
+      <strong class="neutral">Neutral</strong>
+    </div>
+
+    <div class="research-metric">
+      <span>Market state</span>
+      <strong>Wait for confirmation</strong>
+    </div>
+
+    <div class="research-metric">
+      <span>Support zone</span>
+      <strong>54,880 – 54,960</strong>
+    </div>
+
+    <div class="research-metric">
+      <span>Resistance zone</span>
+      <strong>55,220 – 55,320</strong>
+    </div>
+  </div>
+
+  <div class="research-rule">
+    <strong>Bullish paper-trade condition:</strong>
+    Wait for a confirmed close above 55,320 and record the stop loss before creating a paper trade.
+  </div>
+
+  <div class="research-rule">
+    <strong>Bearish paper-trade condition:</strong>
+    Wait for confirmation below 54,880 and record the invalidation level before a paper trade.
+  </div>
+</article>
           <article class="card section-card">
             <div class="section-heading">
               <div>
