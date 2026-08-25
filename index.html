@@ -944,35 +944,37 @@
       top: 75%;
     }
 
-    .chart-candles {
-      position: absolute;
-      right: 26px;
-      bottom: 26px;
-      left: 26px;
-      display: flex;
-      height: calc(100% - 52px);
-      align-items: flex-end;
-      gap: 7px;
-    }
+   .chart-candles {
+  position: absolute;
+  top: 26px;
+  right: 26px;
+  bottom: 26px;
+  left: 26px;
+  height: calc(100% - 52px);
+  overflow: hidden;
+  pointer-events: none;
+}
 
     .candle {
-      position: relative;
+      position: absolute;
+      transform: translateX(-50%);
+      z-index: 3;
       display: block;
-      width: 12px;
-      min-width: 6px;
+      width: 8px;
       border-radius: 2px;
     }
 
-    .candle::before {
-      position: absolute;
-      top: var(--wick-top);
-      bottom: var(--wick-bottom);
-      left: 50%;
-      width: 2px;
-      background: currentColor;
-      content: "";
-      transform: translateX(-50%);
-    }
+   .candle::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: var(--wick-top);
+  width: 1px;
+  height: var(--wick-height);
+  transform: translateX(-50%);
+  background: currentColor;
+  z-index: -1;
+}
 
     .candle-bullish {
       color: var(--green);
@@ -2584,13 +2586,16 @@ if (decisionLabel) {
         return;
       }
 
-      title.textContent = `${data.market || profile.name} · ${selectedChartTimeframe}`;
-      subtitle.textContent =
-        "Backend confirmation-engine data. Demo market values remain active until Upstox live data is connected.";
-      status.textContent = "Backend demo feed";
-      price.textContent = formatNumber(profile.price);
-      decision.textContent = profile.decision;
-      decision.className = `chart-decision ${decisionClass(profile.decision)}`;
+           title.textContent = `${data.market || profile.name} · ${selectedChartTimeframe}`;
+
+      if (!latestLiveCandleData) {
+        subtitle.textContent =
+          "Backend confirmation-engine data. Demo market values remain active until Upstox live data is connected.";
+        status.textContent = "Backend demo feed";
+        price.textContent = formatNumber(profile.price);
+        decision.textContent = profile.decision;
+        decision.className = `chart-decision ${decisionClass(profile.decision)}`;
+      }
 
       entry.textContent = profile.entry;
       stop.textContent = profile.stop;
@@ -2652,9 +2657,22 @@ if (decisionLabel) {
       const buyMarker = document.getElementById("chart-buy-marker");
       const sellMarker = document.getElementById("chart-sell-marker");
 
-      if (!title) {
-        return;
-      }
+     if (
+  !title ||
+  !subtitle ||
+  !status ||
+  !price ||
+  !decision ||
+  !entry ||
+  !stop ||
+  !target1 ||
+  !target2 ||
+  !exit ||
+  !buyMarker ||
+  !sellMarker
+) {
+  return;
+}
 
       title.textContent = `${profile.name} · ${selectedChartTimeframe}`;
       subtitle.textContent = "Demo chart only. Upstox live candle feed will replace this after API setup.";
