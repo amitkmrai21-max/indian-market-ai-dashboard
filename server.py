@@ -465,10 +465,9 @@ def live_candles(market_key):
     )
 
     try:
-        upstream_response = requests.get(
-            candle_url,
+               upstream_response = requests.get(
+            url,
             headers=headers,
-            params=params,
             timeout=20,
         )
 
