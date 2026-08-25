@@ -632,6 +632,181 @@
         grid-template-columns: 1fr;
       }
     }
+        .live-engine-section {
+      margin-top: 18px;
+    }
+
+    .live-engine-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.85fr);
+      gap: 18px;
+    }
+
+    .decision-card {
+      padding: 20px;
+      border: 1px solid rgba(69, 182, 255, 0.28);
+      border-radius: 14px;
+      background:
+        linear-gradient(135deg, rgba(69, 182, 255, 0.12), rgba(54, 207, 131, 0.06)),
+        rgba(12, 27, 46, 0.88);
+      box-shadow: var(--shadow);
+    }
+
+    .decision-label {
+      margin: 8px 0;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .decision-meta {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .decision-buy {
+      color: var(--green);
+    }
+
+    .decision-sell {
+      color: var(--red);
+    }
+
+    .decision-wait {
+      color: var(--yellow);
+    }
+
+    .technical-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .technical-item {
+      padding: 12px;
+      border: 1px solid rgba(29, 54, 85, 0.85);
+      border-radius: 10px;
+      background: rgba(16, 36, 61, 0.45);
+    }
+
+    .technical-item span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+
+    .technical-item strong {
+      display: block;
+      margin-top: 5px;
+      font-size: 14px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .confirmation-list {
+      display: grid;
+      gap: 9px;
+    }
+
+    .confirmation-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 11px 0;
+      border-bottom: 1px solid rgba(29, 54, 85, 0.72);
+    }
+
+    .confirmation-row:last-child {
+      border-bottom: 0;
+    }
+
+    .confirmation-name {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .confirmation-reason {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .confirmation-state {
+      flex: 0 0 auto;
+      padding: 5px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .state-bullish {
+      color: #bdf7d5;
+      background: rgba(54, 207, 131, 0.13);
+    }
+
+    .state-bearish {
+      color: #ffc0c7;
+      background: rgba(255, 111, 125, 0.13);
+    }
+
+    .state-neutral {
+      color: #f7de8a;
+      background: rgba(247, 201, 72, 0.13);
+    }
+
+    .trade-plan-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .trade-plan-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 11px 0;
+      border-bottom: 1px solid rgba(29, 54, 85, 0.72);
+    }
+
+    .trade-plan-row:last-child {
+      border-bottom: 0;
+    }
+
+    .trade-plan-row span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .trade-plan-row strong {
+      max-width: 62%;
+      text-align: right;
+      font-size: 13px;
+      line-height: 1.45;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .api-status {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    @media (max-width: 760px) {
+      .live-engine-grid,
+      .technical-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .trade-plan-row strong {
+        max-width: 58%;
+      }
+    }
   </style>
 </head>
 
@@ -858,6 +1033,67 @@
           </article>
         </div>
       </section>
+            <section class="live-engine-section" aria-label="NIFTY 50 technical confirmation engine">
+        <div class="live-engine-grid">
+          <article class="decision-card">
+            <p class="eyebrow">Connected confirmation engine</p>
+            <div class="decision-label decision-wait" id="nifty-decision-label">
+              Loading technical decision...
+            </div>
+            <p class="decision-meta" id="nifty-decision-reason">
+              Connecting to the research API.
+            </p>
+            <p class="api-status" id="nifty-api-status">
+              Technical refresh: waiting for first update.
+            </p>
+          </article>
+
+          <article class="card section-card">
+            <div class="section-heading">
+              <div>
+                <h2>Live Technical Metrics</h2>
+                <p>Auto-refreshes every 60 seconds</p>
+              </div>
+            </div>
+
+            <div class="technical-grid" id="nifty-technical-grid">
+              <div class="technical-item">
+                <span>Loading</span>
+                <strong>--</strong>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <div class="live-engine-grid" style="margin-top: 18px;">
+          <article class="card section-card">
+            <div class="section-heading">
+              <div>
+                <h2>Confirmation Matrix</h2>
+                <p>Combined indicators and timeframe checks</p>
+              </div>
+              <span class="tag" id="nifty-confirmation-count">-- / --</span>
+            </div>
+
+            <div class="confirmation-list" id="nifty-confirmation-list">
+              <div class="empty-note">Loading indicator confirmations...</div>
+            </div>
+          </article>
+
+          <article class="card section-card">
+            <div class="section-heading">
+              <div>
+                <h2>Research Trade Plan</h2>
+                <p>Entry condition, risk level, targets, and exit rule</p>
+              </div>
+            </div>
+
+            <div class="trade-plan-list" id="nifty-trade-plan">
+              <div class="empty-note">Loading research plan...</div>
+            </div>
+          </article>
+        </div>
+      </section>
 
       <section class="page" id="banknifty">
         <article class="card index-hero">
@@ -928,6 +1164,67 @@
               <li>Keep paper-trade risk consistent across setups.</li>
               <li>Review the outcome and note what changed.</li>
             </ul>
+          </article>
+        </div>
+      </section>
+            <section class="live-engine-section" aria-label="Bank Nifty technical confirmation engine">
+        <div class="live-engine-grid">
+          <article class="decision-card">
+            <p class="eyebrow">Connected confirmation engine</p>
+            <div class="decision-label decision-wait" id="banknifty-decision-label">
+              Loading technical decision...
+            </div>
+            <p class="decision-meta" id="banknifty-decision-reason">
+              Connecting to the research API.
+            </p>
+            <p class="api-status" id="banknifty-api-status">
+              Technical refresh: waiting for first update.
+            </p>
+          </article>
+
+          <article class="card section-card">
+            <div class="section-heading">
+              <div>
+                <h2>Live Technical Metrics</h2>
+                <p>Auto-refreshes every 60 seconds</p>
+              </div>
+            </div>
+
+            <div class="technical-grid" id="banknifty-technical-grid">
+              <div class="technical-item">
+                <span>Loading</span>
+                <strong>--</strong>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <div class="live-engine-grid" style="margin-top: 18px;">
+          <article class="card section-card">
+            <div class="section-heading">
+              <div>
+                <h2>Confirmation Matrix</h2>
+                <p>Combined indicators and timeframe checks</p>
+              </div>
+              <span class="tag" id="banknifty-confirmation-count">-- / --</span>
+            </div>
+
+            <div class="confirmation-list" id="banknifty-confirmation-list">
+              <div class="empty-note">Loading indicator confirmations...</div>
+            </div>
+          </article>
+
+          <article class="card section-card">
+            <div class="section-heading">
+              <div>
+                <h2>Research Trade Plan</h2>
+                <p>Entry condition, risk level, targets, and exit rule</p>
+              </div>
+            </div>
+
+            <div class="trade-plan-list" id="banknifty-trade-plan">
+              <div class="empty-note">Loading research plan...</div>
+            </div>
           </article>
         </div>
       </section>
@@ -1188,6 +1485,210 @@
     });
 
     renderTrades();
+    
+    const API_BASE_URL = "https://indian-market-ai-api.onrender.com";
+
+    function formatNumber(value) {
+      if (value === null || value === undefined) {
+        return "--";
+      }
+
+      return Number(value).toLocaleString("en-IN", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function escapeHtml(value) {
+      const div = document.createElement("div");
+      div.textContent = String(value);
+      return div.innerHTML;
+    }
+
+    function decisionClass(label) {
+      if (label.includes("BUY")) {
+        return "decision-buy";
+      }
+
+      if (label.includes("SELL")) {
+        return "decision-sell";
+      }
+
+      return "decision-wait";
+    }
+
+    function renderTechnicalMetrics(marketKey, data) {
+      const grid = document.getElementById(`${marketKey}-technical-grid`);
+
+      if (!grid) {
+        return;
+      }
+
+      const metrics = [
+        ["Price", formatNumber(data.price)],
+        ["Change", `${data.change_percent >= 0 ? "+" : ""}${data.change_percent}%`],
+        ["Open", formatNumber(data.open)],
+        ["High", formatNumber(data.high)],
+        ["Low", formatNumber(data.low)],
+        ["RSI 14", data.indicators.rsi_14],
+        ["EMA 9 / 21", `${formatNumber(data.indicators.ema_9)} / ${formatNumber(data.indicators.ema_21)}`],
+        ["VWAP", formatNumber(data.indicators.vwap)],
+        ["Volume Ratio", `${data.indicators.volume_ratio}x`],
+        ["ATR 14", formatNumber(data.indicators.atr_14)]
+      ];
+
+      grid.innerHTML = metrics
+        .map(
+          ([label, value]) => `
+            <div class="technical-item">
+              <span>${escapeHtml(label)}</span>
+              <strong>${escapeHtml(value)}</strong>
+            </div>
+          `
+        )
+        .join("");
+    }
+
+    function renderConfirmations(marketKey, data) {
+      const list = document.getElementById(`${marketKey}-confirmation-list`);
+      const count = document.getElementById(`${marketKey}-confirmation-count`);
+
+      if (!list || !count) {
+        return;
+      }
+
+      count.textContent = `${data.decision.bullish_count} bullish / ${data.decision.bearish_count} bearish`;
+
+      list.innerHTML = data.confirmations
+        .map(
+          (item) => `
+            <div class="confirmation-row">
+              <div>
+                <div class="confirmation-name">${escapeHtml(item.name)}</div>
+                <div class="confirmation-reason">${escapeHtml(item.reason)}</div>
+              </div>
+              <span class="confirmation-state state-${escapeHtml(item.state)}">
+                ${escapeHtml(item.state)}
+              </span>
+            </div>
+          `
+        )
+        .join("");
+    }
+
+    function renderTradePlan(marketKey, data) {
+      const plan = document.getElementById(`${marketKey}-trade-plan`);
+
+      if (!plan) {
+        return;
+      }
+
+      const entry = data.trade_plan.entry_zone;
+      const entryText =
+        entry.from === null || entry.to === null
+          ? "No entry"
+          : `${formatNumber(entry.from)} – ${formatNumber(entry.to)}`;
+
+      const rows = [
+        ["Decision", data.decision.label],
+        ["Entry zone", entryText],
+        ["Entry condition", entry.condition],
+        ["Stop-loss", formatNumber(data.trade_plan.stop_loss)],
+        ["Target 1", formatNumber(data.trade_plan.target_1)],
+        ["Target 2", formatNumber(data.trade_plan.target_2)],
+        ["Support", formatNumber(data.levels.support)],
+        ["Resistance", formatNumber(data.levels.resistance)],
+        ["Exit rule", data.trade_plan.exit_rule]
+      ];
+
+      plan.innerHTML = rows
+        .map(
+          ([label, value]) => `
+            <div class="trade-plan-row">
+              <span>${escapeHtml(label)}</span>
+              <strong>${escapeHtml(value)}</strong>
+            </div>
+          `
+        )
+        .join("");
+    }
+
+    function renderMarketEngine(marketKey, data) {
+      const label = document.getElementById(`${marketKey}-decision-label`);
+      const reason = document.getElementById(`${marketKey}-decision-reason`);
+      const status = document.getElementById(`${marketKey}-api-status`);
+
+      if (label) {
+        label.textContent = data.decision.label;
+        label.className = `decision-label ${decisionClass(data.decision.label)}`;
+      }
+
+      if (reason) {
+        reason.textContent = `${data.decision.reason} Score: ${data.decision.weighted_score}/${data.decision.max_score}.`;
+      }
+
+      if (status) {
+        const time = new Date(data.updated_at).toLocaleTimeString("en-IN", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit"
+        });
+
+        status.textContent = `Technical API connected · Last refresh: ${time}`;
+      }
+
+      renderTechnicalMetrics(marketKey, data);
+      renderConfirmations(marketKey, data);
+      renderTradePlan(marketKey, data);
+    }
+
+    function renderApiError(marketKey) {
+      const label = document.getElementById(`${marketKey}-decision-label`);
+      const reason = document.getElementById(`${marketKey}-decision-reason`);
+      const status = document.getElementById(`${marketKey}-api-status`);
+
+      if (label) {
+        label.textContent = "TECHNICAL DATA UNAVAILABLE";
+        label.className = "decision-label decision-wait";
+      }
+
+      if (reason) {
+        reason.textContent = "The research API could not be reached. The backend may be starting or temporarily unavailable.";
+      }
+
+      if (status) {
+        status.textContent = "Refresh will retry automatically in 60 seconds.";
+      }
+    }
+
+    async function loadMarketEngine(marketKey) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/market/${marketKey}`);
+
+        if (!response.ok) {
+          throw new Error(`API request failed: ${response.status}`);
+        }
+
+        const payload = await response.json();
+
+        if (!payload.ok || !payload.data) {
+          throw new Error("Invalid API response");
+        }
+
+        renderMarketEngine(marketKey, payload.data);
+      } catch (error) {
+        console.error(`Could not load ${marketKey} technical engine`, error);
+        renderApiError(marketKey);
+      }
+    }
+
+    function refreshTechnicalEngine() {
+      loadMarketEngine("nifty");
+      loadMarketEngine("banknifty");
+    }
+
+    refreshTechnicalEngine();
+    setInterval(refreshTechnicalEngine, 60000);
   </script>
 </body>
 </html>
