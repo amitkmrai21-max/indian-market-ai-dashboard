@@ -2390,16 +2390,63 @@
       });
     });
 
-    const chartAiButton = document.getElementById("chart-ai-button");
+   const chartAiButton = document.getElementById("chart-ai-button");
 
     if (chartAiButton) {
-      chartAiButton.addEventListener("click", () => {
+      chartAiButton.addEventListener("click", async () => {
         const title = document.getElementById("chart-ai-title");
         const text = document.getElementById("chart-ai-text");
 
-        title.textContent = "Gemini setup pending";
+        chartAiButton.disabled = true;
+        chartAiButton.textContent = "Generating Gemini review...";
+        title.textContent = "Gemini review in progress";
         text.textContent =
-          "The chart controls are working. Gemini will be connected securely after you add your API key in Render Environment settings.";
+          "Sending the selected index, timeframe, and technical research snapshot securely to the backend...";
+
+        try {
+          const response = await fetch(
+            "https://indian-market-ai-api.onrender.com/api/gemini/review",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                market: selectedChartMarket,
+                timeframe: selectedChartTimeframe
+              })
+            }
+          );
+
+          const result = await response.json();
+
+          if (!response.ok || !result.ok) {
+            throw new Error(result.error || "Gemini review request failed.");
+          }
+
+          title.textContent = `Gemini review · ${result.market} · ${result.timeframe}`;
+          text.textContent = result.review;
+
+          const validUntil = new Date(
+            new Date(result.generated_at).getTime() + result.valid_for_seconds * 1000
+          );
+
+          chartAiButton.textContent = `Review ready · valid until ${validUntil.toLocaleTimeString(
+            [],
+            {
+              hour: "2-digit",
+              minute: "2-digit"
+            }
+          )}`;
+        } catch (error) {
+          title.textContent = "Gemini review unavailable";
+          text.textContent =
+            error.message ||
+            "Could not generate the Gemini review. Please wait a moment and try again.";
+          chartAiButton.textContent = "Retry Gemini AI Review";
+        } finally {
+          chartAiButton.disabled = false;
+        }
       });
     }
 
