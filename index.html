@@ -2291,6 +2291,177 @@
       return candles;
     }
 
+    const LIVE_CANDLE_API_BASE = "https://indian-market-ai-api.onrender.com";
+    let chartRefreshTimer = null;
+    let latestLiveCandleData = null;
+
+    function formatChartTime(value) {
+      const date = new Date(value);
+
+      if (Number.isNaN(date.getTime())) {
+        return "Unknown time";
+      }
+
+      return date.toLocaleString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true
+      });
+    }
+
+    function getChartCandleMetrics(candles) {
+      const highs = candles.map((candle) => Number(candle.high));
+      const lows = candles.map((candle) => Number(candle.low));
+      const highest = Math.max(...highs);
+      const lowest = Math.min(...lows);
+      const range = Math.max(highest - lowest, 1);
+
+      return {
+        highest,
+        lowest,
+        range
+      };
+    }
+
+    function renderLiveChartCandles(candles) {
+      const candleContainer = document.getElementById("chart-candles");
+
+      if (!candleContainer || !Array.isArray(candles) || !candles.length) {
+        return;
+      }
+
+      const visibleCandles = candles.slice(-42);
+      const { highest, lowest, range } = getChartCandleMetrics(visibleCandles);
+
+      candleContainer.innerHTML = visibleCandles
+        .map((candle) => {
+          const open = Number(candle.open);
+          const high = Number(candle.high);
+          const low = Number(candle.low);
+          const close = Number(candle.close);
+          const bullish = close >= open;
+
+          const bodyHeight = Math.max(
+            5,
+            ((Math.abs(close - open) / range) * 100)
+          );
+
+          const wickTop = -Math.max(
+            2,
+            ((high - Math.max(open, close)) / range) * 100
+          );
+
+          const wickBottom = -Math.max(
+            2,
+            ((Math.min(open, close) - low) / range) * 100
+          );
+
+          return `
+            <span
+              class="candle ${bullish ? "candle-bullish" : "candle-bearish"}"
+              style="
+                height: ${bodyHeight}%;
+                --wick-top: ${wickTop}%;
+                --wick-bottom: ${wickBottom}%;
+              "
+              title="${formatChartTime(candle.time)} · O ${formatNumber(open)} · H ${formatNumber(high)} · L ${formatNumber(low)} · C ${formatNumber(close)}"
+            ></span>
+          `;
+        })
+        .join("");
+
+      const top = document.getElementById("chart-scale-top");
+      const mid = document.getElementById("chart-scale-mid");
+      const bottom = document.getElementById("chart-scale-bottom");
+
+      if (top) {
+        top.textContent = formatNumber(highest);
+      }
+
+      if (mid) {
+        mid.textContent = formatNumber((highest + lowest) / 2);
+      }
+
+      if (bottom) {
+        bottom.textContent = formatNumber(lowest);
+      }
+    }
+
+    async function refreshLiveChartCandles() {
+      const requestedMarket = selectedChartMarket;
+      const requestedTimeframe = selectedChartTimeframe;
+      const status = document.getElementById("chart-data-status");
+      const subtitle = document.getElementById("chart-market-subtitle");
+
+      if (status) {
+        status.textContent = "Loading Upstox candles...";
+      }
+
+      try {
+        const response = await fetch(
+          `${LIVE_CANDLE_API_BASE}/api/live/candles/${requestedMarket}?timeframe=${requestedTimeframe}`
+        );
+
+        const result = await response.json();
+
+        if (!response.ok || !result.ok || !Array.isArray(result.candles)) {
+          throw new Error(result.error || "Live candle data is unavailable.");
+        }
+
+        if (
+          requestedMarket !== selectedChartMarket ||
+          requestedTimeframe !== selectedChartTimeframe
+        ) {
+          return;
+        }
+
+        latestLiveCandleData = result;
+        renderLiveChartCandles(result.candles);
+
+        const latest = result.latest || result.candles[result.candles.length - 1];
+        const price = document.getElementById("chart-last-price");
+
+        if (price && latest) {
+          price.textContent = formatNumber(latest.close);
+        }
+
+        if (status) {
+          status.textContent = "Upstox candle feed";
+        }
+
+        if (subtitle && latest) {
+          subtitle.textContent = `Upstox market-data candles · Last candle: ${formatChartTime(
+            latest.time
+          )} · Refreshes every 60 seconds during market hours.`;
+        }
+      } catch (error) {
+        console.error("Upstox live candle refresh failed:", error);
+
+        if (status) {
+          status.textContent = "Live data unavailable";
+        }
+
+        if (subtitle) {
+          subtitle.textContent =
+            "Upstox candle data could not be loaded. Showing the existing chart until the next refresh.";
+        }
+      }
+    }
+
+    function startLiveChartPolling() {
+      if (chartRefreshTimer) {
+        window.clearInterval(chartRefreshTimer);
+      }
+
+      refreshLiveChartCandles();
+
+      chartRefreshTimer = window.setInterval(() => {
+        refreshLiveChartCandles();
+      }, 60000);
+    }
+    
     function renderChartCandles(marketKey, timeframe) {
       const candleContainer = document.getElementById("chart-candles");
 
@@ -2421,7 +2592,9 @@
       sellMarker.style.display = profile.decision.includes("SELL") ? "block" : "none";
 
       setChartLevelLabels(profile);
-      renderChartCandles(selectedChartMarket, selectedChartTimeframe);
+            if (!latestLiveCandleData) {
+        renderChartCandles(selectedChartMarket, selectedChartTimeframe);
+      }
     }
 
     async function refreshChartFromBackend() {
@@ -2489,9 +2662,14 @@
       buyMarker.style.display = profile.decision.includes("BUY") ? "block" : "none";
       sellMarker.style.display = profile.decision.includes("SELL") ? "block" : "none";
 
-      setChartLevelLabels(profile);
-      renderChartCandles(selectedChartMarket, selectedChartTimeframe);
-            refreshChartFromBackend();
+            setChartLevelLabels(profile);
+
+      if (!latestLiveCandleData) {
+        renderChartCandles(selectedChartMarket, selectedChartTimeframe);
+      }
+
+      refreshChartFromBackend();
+      startLiveChartPolling();
     }
 
     document.querySelectorAll("[data-chart-market]").forEach((button) => {
@@ -2502,8 +2680,8 @@
           item.classList.toggle("active", item === button);
         });
 
+              latestLiveCandleData = null;
         updateChartPage();
-        refreshChartFromBackend();
       });
     });
 
@@ -2515,6 +2693,7 @@
           item.classList.toggle("active", item === button);
         });
 
+                latestLiveCandleData = null;
         updateChartPage();
       });
     });
