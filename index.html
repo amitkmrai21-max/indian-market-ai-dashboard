@@ -2448,16 +2448,16 @@ if (decisionLabel) {
             latest.time
           )} · Refreshes every 60 seconds during market hours.`;
         }
-      } catch (error) {
+          } catch (error) {
         console.error("Upstox live candle refresh failed:", error);
 
         if (status) {
-          status.textContent = "Live data unavailable";
+          status.textContent = `Live error: ${error.message}`;
         }
 
         if (subtitle) {
           subtitle.textContent =
-            "Upstox candle data could not be loaded. Showing the existing chart until the next refresh.";
+            "Live candle request failed. Open browser Console for the full error.";
         }
       }
     }
