@@ -465,16 +465,13 @@ def live_candles(market_key):
     )
 
     try:
-        upstream_response = requests.get(
-            upstream_url,
-            headers={
-                "Accept": "application/json",
-                "Authorization": f"Bearer {UPSTOX_ACCESS_TOKEN}",
-            },
-            timeout=15,
+               upstream_response = requests.get(
+            candle_url,
+            headers=headers,
+            timeout=20,
         )
 
-              if not upstream_response.ok:
+        if not upstream_response.ok:
             app.logger.warning(
                 "Upstox candle request failed: status=%s",
                 upstream_response.status_code,
