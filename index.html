@@ -2419,6 +2419,16 @@
 
         latestLiveCandleData = result;
         renderLiveChartCandles(result.candles);
+        const chartDecision = document.getElementById("chart-decision");
+const decisionLabel = document.getElementById("chart-decision-label");
+
+if (chartDecision) {
+  chartDecision.textContent = "LIVE OHLC";
+}
+
+if (decisionLabel) {
+  decisionLabel.textContent = "Upstox feed active";
+}
 
         const latest = result.latest || result.candles[result.candles.length - 1];
         const price = document.getElementById("chart-last-price");
