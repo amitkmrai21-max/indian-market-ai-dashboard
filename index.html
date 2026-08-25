@@ -807,6 +807,320 @@
         max-width: 58%;
       }
     }
+        .chart-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .chart-control-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .chart-control-label {
+      margin-right: 2px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .chart-control-button {
+      padding: 8px 10px;
+      border: 1px solid rgba(69, 182, 255, 0.2);
+      border-radius: 8px;
+      color: var(--muted);
+      background: rgba(16, 36, 61, 0.55);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 800;
+      transition: 0.2s ease;
+    }
+
+    .chart-control-button:hover,
+    .chart-control-button.active {
+      border-color: rgba(69, 182, 255, 0.65);
+      color: var(--text);
+      background: rgba(69, 182, 255, 0.16);
+    }
+
+    .live-chart-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(290px, 0.8fr);
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .chart-side-panel {
+      display: grid;
+      gap: 18px;
+      align-content: start;
+    }
+
+    .chart-price-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 18px;
+      padding: 14px;
+      border: 1px solid rgba(29, 54, 85, 0.85);
+      border-radius: 11px;
+      background: rgba(16, 36, 61, 0.42);
+    }
+
+    .chart-price-label {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.45px;
+      text-transform: uppercase;
+    }
+
+    .chart-price-value,
+    .chart-decision {
+      display: block;
+      margin-top: 5px;
+      font-size: 22px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .custom-chart-shell {
+      display: grid;
+      grid-template-columns: 68px minmax(0, 1fr);
+      min-height: 430px;
+      border: 1px solid rgba(29, 54, 85, 0.86);
+      border-radius: 12px;
+      overflow: hidden;
+      background: #081728;
+    }
+
+    .chart-scale {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 18px 8px;
+      border-right: 1px solid rgba(29, 54, 85, 0.72);
+      color: var(--muted);
+      background: rgba(7, 17, 31, 0.52);
+      font-size: 11px;
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+    }
+
+    .custom-chart-canvas {
+      position: relative;
+      min-width: 0;
+      overflow: hidden;
+      background:
+        linear-gradient(rgba(29, 54, 85, 0.32) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(29, 54, 85, 0.32) 1px, transparent 1px),
+        #081728;
+      background-size: 48px 48px;
+    }
+
+    .chart-grid-line {
+      position: absolute;
+      right: 0;
+      left: 0;
+      height: 1px;
+      background: rgba(69, 182, 255, 0.1);
+    }
+
+    .grid-line-1 {
+      top: 25%;
+    }
+
+    .grid-line-2 {
+      top: 50%;
+    }
+
+    .grid-line-3 {
+      top: 75%;
+    }
+
+    .chart-candles {
+      position: absolute;
+      right: 26px;
+      bottom: 26px;
+      left: 26px;
+      display: flex;
+      height: calc(100% - 52px);
+      align-items: flex-end;
+      gap: 7px;
+    }
+
+    .candle {
+      position: relative;
+      display: block;
+      width: 12px;
+      min-width: 6px;
+      border-radius: 2px;
+    }
+
+    .candle::before {
+      position: absolute;
+      top: var(--wick-top);
+      bottom: var(--wick-bottom);
+      left: 50%;
+      width: 2px;
+      background: currentColor;
+      content: "";
+      transform: translateX(-50%);
+    }
+
+    .candle-bullish {
+      color: var(--green);
+      background: var(--green);
+    }
+
+    .candle-bearish {
+      color: var(--red);
+      background: var(--red);
+    }
+
+    .chart-level {
+      position: absolute;
+      right: 0;
+      left: 0;
+      display: flex;
+      align-items: center;
+      height: 1px;
+      border-top: 1px dashed;
+      pointer-events: none;
+    }
+
+    .chart-level span {
+      position: absolute;
+      right: 9px;
+      top: -10px;
+      padding: 3px 6px;
+      border-radius: 5px;
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .level-resistance {
+      top: 20%;
+      border-color: rgba(255, 111, 125, 0.82);
+    }
+
+    .level-resistance span {
+      background: rgba(255, 111, 125, 0.74);
+    }
+
+    .level-entry {
+      top: 48%;
+      border-color: rgba(69, 182, 255, 0.9);
+    }
+
+    .level-entry span {
+      background: rgba(69, 182, 255, 0.78);
+    }
+
+    .level-stop {
+      top: 72%;
+      border-color: rgba(247, 201, 72, 0.85);
+    }
+
+    .level-stop span {
+      background: rgba(191, 141, 18, 0.8);
+    }
+
+    .chart-marker {
+      position: absolute;
+      z-index: 3;
+      display: none;
+      padding: 5px 7px;
+      border-radius: 7px;
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 800;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+    }
+
+    .chart-marker-buy {
+      right: 27%;
+      bottom: 42%;
+      background: var(--green);
+    }
+
+    .chart-marker-sell {
+      right: 27%;
+      top: 24%;
+      background: var(--red);
+    }
+
+    .chart-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .chart-legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .legend-price {
+      background: var(--blue);
+    }
+
+    .legend-support {
+      background: var(--red);
+    }
+
+    .legend-entry {
+      background: var(--blue);
+    }
+
+    .legend-stop {
+      background: var(--yellow);
+    }
+
+    @media (max-width: 1050px) {
+      .live-chart-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .chart-price-row {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .custom-chart-shell {
+        grid-template-columns: 55px minmax(0, 1fr);
+        min-height: 350px;
+      }
+
+      .chart-candles {
+        right: 14px;
+        left: 14px;
+        gap: 4px;
+      }
+
+      .candle {
+        width: 8px;
+      }
+    }
   </style>
 </head>
 
@@ -1237,6 +1551,195 @@
       </section>
     
       </section>
+
+      <section class="page" id="live-chart">
+  <article class="card index-hero">
+    <div>
+      <p class="eyebrow">Chart Workspace · Demo until live data is connected</p>
+      <h2 class="index-title">Live Market Chart</h2>
+      <p class="subtitle">
+        Custom chart workspace for NIFTY 50 and Bank Nifty. Real-time candles will connect after Upstox market data setup.
+      </p>
+    </div>
+
+    <div class="setup-badge">Paper research only</div>
+  </article>
+
+  <div class="card section-card">
+    <div class="section-heading">
+      <div>
+        <h2>Chart Controls</h2>
+        <p>Select index and timeframe. Data is currently demonstration-only.</p>
+      </div>
+
+      <span class="tag">Custom chart</span>
+    </div>
+
+    <div class="chart-controls">
+      <div class="chart-control-group">
+        <span class="chart-control-label">Index</span>
+
+        <button class="chart-control-button active" type="button" data-chart-market="nifty">
+          NIFTY 50
+        </button>
+
+        <button class="chart-control-button" type="button" data-chart-market="banknifty">
+          Bank Nifty
+        </button>
+      </div>
+
+      <div class="chart-control-group">
+        <span class="chart-control-label">Timeframe</span>
+
+        <button class="chart-control-button active" type="button" data-chart-timeframe="5m">
+          5m
+        </button>
+
+        <button class="chart-control-button" type="button" data-chart-timeframe="15m">
+          15m
+        </button>
+
+        <button class="chart-control-button" type="button" data-chart-timeframe="1h">
+          1h
+        </button>
+
+        <button class="chart-control-button" type="button" data-chart-timeframe="1d">
+          1D
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="live-chart-layout">
+    <article class="card section-card">
+      <div class="section-heading">
+        <div>
+          <h2 id="chart-market-title">NIFTY 50 · 5m</h2>
+          <p id="chart-market-subtitle">Demo chart. Real-time candle connection pending.</p>
+        </div>
+
+        <span class="tag" id="chart-data-status">Demo feed</span>
+      </div>
+
+      <div class="chart-price-row">
+        <div>
+          <span class="chart-price-label">Last price</span>
+          <strong class="chart-price-value" id="chart-last-price">24,680.55</strong>
+        </div>
+
+        <div>
+          <span class="chart-price-label">Chart decision</span>
+          <strong class="chart-decision decision-wait" id="chart-decision">WAIT</strong>
+        </div>
+      </div>
+
+      <div class="custom-chart-shell">
+        <div class="chart-scale">
+          <span id="chart-scale-top">24,800</span>
+          <span id="chart-scale-mid">24,680</span>
+          <span id="chart-scale-bottom">24,520</span>
+        </div>
+
+        <div class="custom-chart-canvas" id="custom-chart-canvas">
+          <div class="chart-grid-line grid-line-1"></div>
+          <div class="chart-grid-line grid-line-2"></div>
+          <div class="chart-grid-line grid-line-3"></div>
+
+          <div class="chart-level level-resistance" id="chart-resistance-line">
+            <span>Resistance</span>
+          </div>
+
+          <div class="chart-level level-entry" id="chart-entry-line">
+            <span>Entry zone</span>
+          </div>
+
+          <div class="chart-level level-stop" id="chart-stop-line">
+            <span>Stop-loss</span>
+          </div>
+
+          <div class="chart-candles" id="chart-candles"></div>
+
+          <div class="chart-marker chart-marker-buy" id="chart-buy-marker">
+            BUY
+          </div>
+
+          <div class="chart-marker chart-marker-sell" id="chart-sell-marker">
+            SELL
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-legend">
+        <span><i class="legend-dot legend-price"></i>Price candles</span>
+        <span><i class="legend-dot legend-support"></i>Support / resistance</span>
+        <span><i class="legend-dot legend-entry"></i>Entry zone</span>
+        <span><i class="legend-dot legend-stop"></i>Stop-loss</span>
+      </div>
+    </article>
+
+    <aside class="chart-side-panel">
+      <article class="card section-card">
+        <div class="section-heading">
+          <div>
+            <h2>AI Chart Review</h2>
+            <p>Manual AI review will be connected with Gemini.</p>
+          </div>
+        </div>
+
+        <div class="signal-box">
+          <h3 class="signal-title" id="chart-ai-title">Waiting for manual review</h3>
+          <p id="chart-ai-text">
+            The technical confirmation engine will provide the chart context. Gemini review will run only when you press the refresh button.
+          </p>
+        </div>
+
+        <button class="primary-button" id="chart-ai-button" type="button">
+          Refresh Gemini AI Review
+        </button>
+
+        <p class="api-status">
+          Gemini is not connected yet. This button is intentionally inactive until the secure backend setup is complete.
+        </p>
+      </article>
+
+      <article class="card section-card">
+        <div class="section-heading">
+          <div>
+            <h2>Chart Trade Plan</h2>
+            <p>Will use the connected technical engine.</p>
+          </div>
+        </div>
+
+        <div class="trade-plan-list">
+          <div class="trade-plan-row">
+            <span>Entry</span>
+            <strong id="chart-entry-value">--</strong>
+          </div>
+
+          <div class="trade-plan-row">
+            <span>Stop-loss</span>
+            <strong id="chart-stop-value">--</strong>
+          </div>
+
+          <div class="trade-plan-row">
+            <span>Target 1</span>
+            <strong id="chart-target-1-value">--</strong>
+          </div>
+
+          <div class="trade-plan-row">
+            <span>Target 2</span>
+            <strong id="chart-target-2-value">--</strong>
+          </div>
+
+          <div class="trade-plan-row">
+            <span>Exit trigger</span>
+            <strong id="chart-exit-value">Waiting for technical data</strong>
+          </div>
+        </div>
+      </article>
+    </aside>
+  </div>
+</section>
            
       <section class="page" id="paper-trading">
         <div class="paper-grid">
@@ -1699,6 +2202,208 @@
 
     refreshTechnicalEngine();
     setInterval(refreshTechnicalEngine, 60000);
+    
+    let selectedChartMarket = "nifty";
+    let selectedChartTimeframe = "5m";
+
+    function getDemoMarketProfile(marketKey) {
+      if (marketKey === "banknifty") {
+        return {
+          name: "Bank Nifty",
+          price: 55112.4,
+          support: 54920,
+          resistance: 55250,
+          decision: "BUY SETUP",
+          entry: "55,112.40 – 55,149.60",
+          stop: "54,833.20",
+          target1: "55,391.60",
+          target2: "55,670.80",
+          exit: "Exit if stop-loss is hit, price loses VWAP and EMA 21, or an opposite confirmed signal appears."
+        };
+      }
+
+      return {
+        name: "NIFTY 50",
+        price: 24680.55,
+        support: 24580,
+        resistance: 24760,
+        decision: "BUY SETUP",
+        entry: "24,680.55 – 24,698.25",
+        stop: "24,538.70",
+        target1: "24,822.40",
+        target2: "24,964.25",
+        exit: "Exit if stop-loss is hit, price loses VWAP and EMA 21, or an opposite confirmed signal appears."
+      };
+    }
+
+    function createDemoCandles(marketKey, timeframe) {
+      const candleCount = timeframe === "1d" ? 24 : 34;
+      const seedBase = marketKey === "banknifty" ? 13 : 7;
+      const timeMultiplier = {
+        "5m": 1,
+        "15m": 1.4,
+        "1h": 1.9,
+        "1d": 2.5
+      }[timeframe] || 1;
+
+      const candles = [];
+
+      for (let index = 0; index < candleCount; index += 1) {
+        const wave = Math.sin((index + seedBase) * 1.73) * 22;
+        const trend = index * 2.1 * timeMultiplier;
+        const noise = Math.cos((index + seedBase) * 2.31) * 17;
+        const move = wave + trend + noise;
+        const bodyHeight = Math.max(24, Math.min(105, Math.abs(move) + 26));
+        const bullish = move >= 0;
+        const wickTop = -Math.max(10, Math.min(48, 12 + Math.abs(noise)));
+        const wickBottom = -Math.max(10, Math.min(48, 13 + Math.abs(wave) * 0.45));
+
+        candles.push({
+          bullish,
+          height: bodyHeight,
+          wickTop,
+          wickBottom
+        });
+      }
+
+      return candles;
+    }
+
+    function renderChartCandles(marketKey, timeframe) {
+      const candleContainer = document.getElementById("chart-candles");
+
+      if (!candleContainer) {
+        return;
+      }
+
+      const candles = createDemoCandles(marketKey, timeframe);
+
+      candleContainer.innerHTML = candles
+        .map(
+          (candle) => `
+            <span
+              class="candle ${candle.bullish ? "candle-bullish" : "candle-bearish"}"
+              style="
+                height: ${candle.height}px;
+                --wick-top: ${candle.wickTop}px;
+                --wick-bottom: ${candle.wickBottom}px;
+              "
+            ></span>
+          `
+        )
+        .join("");
+    }
+
+    function setChartLevelLabels(profile) {
+      const top = document.getElementById("chart-scale-top");
+      const mid = document.getElementById("chart-scale-mid");
+      const bottom = document.getElementById("chart-scale-bottom");
+      const resistanceLine = document.getElementById("chart-resistance-line");
+      const entryLine = document.getElementById("chart-entry-line");
+      const stopLine = document.getElementById("chart-stop-line");
+
+      if (top) {
+        top.textContent = formatNumber(profile.resistance + 40);
+      }
+
+      if (mid) {
+        mid.textContent = formatNumber(profile.price);
+      }
+
+      if (bottom) {
+        bottom.textContent = formatNumber(profile.support - 60);
+      }
+
+      if (resistanceLine) {
+        resistanceLine.querySelector("span").textContent = `Resistance ${formatNumber(profile.resistance)}`;
+      }
+
+      if (entryLine) {
+        entryLine.querySelector("span").textContent = `Entry ${profile.entry}`;
+      }
+
+      if (stopLine) {
+        stopLine.querySelector("span").textContent = `Stop ${profile.stop}`;
+      }
+    }
+
+    function updateChartPage() {
+      const profile = getDemoMarketProfile(selectedChartMarket);
+      const title = document.getElementById("chart-market-title");
+      const subtitle = document.getElementById("chart-market-subtitle");
+      const status = document.getElementById("chart-data-status");
+      const price = document.getElementById("chart-last-price");
+      const decision = document.getElementById("chart-decision");
+      const entry = document.getElementById("chart-entry-value");
+      const stop = document.getElementById("chart-stop-value");
+      const target1 = document.getElementById("chart-target-1-value");
+      const target2 = document.getElementById("chart-target-2-value");
+      const exit = document.getElementById("chart-exit-value");
+      const buyMarker = document.getElementById("chart-buy-marker");
+      const sellMarker = document.getElementById("chart-sell-marker");
+
+      if (!title) {
+        return;
+      }
+
+      title.textContent = `${profile.name} · ${selectedChartTimeframe}`;
+      subtitle.textContent = "Demo chart only. Upstox live candle feed will replace this after API setup.";
+      status.textContent = "Demo feed";
+      price.textContent = formatNumber(profile.price);
+      decision.textContent = profile.decision;
+      decision.className = `chart-decision ${decisionClass(profile.decision)}`;
+
+      entry.textContent = profile.entry;
+      stop.textContent = profile.stop;
+      target1.textContent = profile.target1;
+      target2.textContent = profile.target2;
+      exit.textContent = profile.exit;
+
+      buyMarker.style.display = profile.decision.includes("BUY") ? "block" : "none";
+      sellMarker.style.display = profile.decision.includes("SELL") ? "block" : "none";
+
+      setChartLevelLabels(profile);
+      renderChartCandles(selectedChartMarket, selectedChartTimeframe);
+    }
+
+    document.querySelectorAll("[data-chart-market]").forEach((button) => {
+      button.addEventListener("click", () => {
+        selectedChartMarket = button.dataset.chartMarket;
+
+        document.querySelectorAll("[data-chart-market]").forEach((item) => {
+          item.classList.toggle("active", item === button);
+        });
+
+        updateChartPage();
+      });
+    });
+
+    document.querySelectorAll("[data-chart-timeframe]").forEach((button) => {
+      button.addEventListener("click", () => {
+        selectedChartTimeframe = button.dataset.chartTimeframe;
+
+        document.querySelectorAll("[data-chart-timeframe]").forEach((item) => {
+          item.classList.toggle("active", item === button);
+        });
+
+        updateChartPage();
+      });
+    });
+
+    const chartAiButton = document.getElementById("chart-ai-button");
+
+    if (chartAiButton) {
+      chartAiButton.addEventListener("click", () => {
+        const title = document.getElementById("chart-ai-title");
+        const text = document.getElementById("chart-ai-text");
+
+        title.textContent = "Gemini setup pending";
+        text.textContent =
+          "The chart controls are working. Gemini will be connected securely after you add your API key in Render Environment settings.";
+      });
+    }
+
+    updateChartPage();
   </script>
 </body>
 </html>
