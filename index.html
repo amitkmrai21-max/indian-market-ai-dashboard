@@ -1,0 +1,1193 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta
+    name="description"
+    content="Indian Market AI Dashboard for personal research and paper trading."
+  />
+  <title>Indian Market AI Dashboard</title>
+
+  <style>
+    :root {
+      --bg: #07111f;
+      --panel: #0c1b2e;
+      --panel-2: #10243d;
+      --border: #1d3655;
+      --text: #edf5ff;
+      --muted: #93a9c3;
+      --blue: #45b6ff;
+      --green: #36cf83;
+      --red: #ff6f7d;
+      --yellow: #f7c948;
+      --shadow: 0 18px 45px rgba(0, 0, 0, 0.28);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(36, 126, 190, 0.18), transparent 34%),
+        radial-gradient(circle at bottom left, rgba(38, 190, 136, 0.1), transparent 28%),
+        var(--bg);
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    .app-shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 250px 1fr;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 24px 16px;
+      border-right: 1px solid var(--border);
+      background: rgba(7, 17, 31, 0.92);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 10px 28px;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 11px;
+      color: #ffffff;
+      background: linear-gradient(135deg, #17a2ff, #30d690);
+      font-weight: 800;
+      box-shadow: 0 10px 25px rgba(23, 162, 255, 0.22);
+    }
+
+    .brand-text strong,
+    .brand-text span {
+      display: block;
+    }
+
+    .brand-text strong {
+      font-size: 15px;
+    }
+
+    .brand-text span {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .nav-label {
+      margin: 18px 10px 8px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .nav-button {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      margin: 4px 0;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      color: var(--muted);
+      background: transparent;
+      cursor: pointer;
+      text-align: left;
+      transition: 0.2s ease;
+    }
+
+    .nav-button:hover,
+    .nav-button.active {
+      color: var(--text);
+      border-color: rgba(69, 182, 255, 0.24);
+      background: rgba(69, 182, 255, 0.1);
+    }
+
+    .nav-icon {
+      width: 20px;
+      color: var(--blue);
+      text-align: center;
+      font-weight: 800;
+    }
+
+    .sidebar-note {
+      position: absolute;
+      right: 16px;
+      bottom: 20px;
+      left: 16px;
+      padding: 14px;
+      border: 1px solid rgba(247, 201, 72, 0.22);
+      border-radius: 12px;
+      color: #ecd690;
+      background: rgba(247, 201, 72, 0.07);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .content {
+      min-width: 0;
+      padding: 28px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 26px;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.1px;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(25px, 3vw, 36px);
+      line-height: 1.15;
+    }
+
+    .subtitle {
+      margin: 9px 0 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .market-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: max-content;
+      padding: 10px 13px;
+      border: 1px solid rgba(54, 207, 131, 0.24);
+      border-radius: 999px;
+      color: #a9f0c8;
+      background: rgba(54, 207, 131, 0.08);
+      font-size: 13px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 5px rgba(54, 207, 131, 0.1);
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(12, 27, 46, 0.88);
+      box-shadow: var(--shadow);
+    }
+
+    .stat-card {
+      min-height: 138px;
+      padding: 18px;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .stat-value {
+      margin-top: 14px;
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.4px;
+    }
+
+    .stat-change {
+      display: inline-flex;
+      margin-top: 8px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .positive {
+      color: var(--green);
+    }
+
+    .negative {
+      color: var(--red);
+    }
+
+    .neutral {
+      color: var(--yellow);
+    }
+
+    .dashboard-grid,
+    .paper-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.8fr);
+      gap: 18px;
+    }
+
+    .section-card {
+      padding: 20px;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 15px;
+      margin-bottom: 18px;
+    }
+
+    .section-heading h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .section-heading p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .tag,
+    .setup-badge {
+      padding: 6px 9px;
+      border: 1px solid rgba(69, 182, 255, 0.22);
+      border-radius: 999px;
+      color: #9bd6ff;
+      background: rgba(69, 182, 255, 0.08);
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .chart-placeholder {
+      position: relative;
+      display: grid;
+      min-height: 285px;
+      padding: 22px;
+      overflow: hidden;
+      align-items: end;
+      border: 1px dashed rgba(69, 182, 255, 0.26);
+      border-radius: 12px;
+      background:
+        linear-gradient(rgba(29, 54, 85, 0.35) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(29, 54, 85, 0.35) 1px, transparent 1px),
+        rgba(16, 36, 61, 0.42);
+      background-size: 42px 42px;
+    }
+
+    .line-chart {
+      height: 176px;
+      border-bottom: 2px solid rgba(69, 182, 255, 0.8);
+      border-radius: 0 0 50% 0;
+      transform: skewY(-9deg);
+      box-shadow: 0 12px 0 -9px rgba(54, 207, 131, 0.82);
+    }
+
+    .chart-note {
+      position: absolute;
+      top: 18px;
+      left: 18px;
+      max-width: 290px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .market-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .market-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px;
+      border: 1px solid rgba(29, 54, 85, 0.8);
+      border-radius: 11px;
+      background: rgba(16, 36, 61, 0.48);
+    }
+
+    .market-name {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .market-meta {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .market-price {
+      text-align: right;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .signal-box {
+      padding: 16px;
+      border: 1px solid rgba(54, 207, 131, 0.18);
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(54, 207, 131, 0.1), rgba(69, 182, 255, 0.06));
+    }
+
+    .signal-title {
+      margin: 0 0 8px;
+      color: #b9f5d1;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .signal-box p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+        .index-hero {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 18px;
+      align-items: center;
+      padding: 22px;
+      margin-bottom: 18px;
+    }
+
+    .index-title {
+      margin: 0;
+      font-size: 25px;
+    }
+
+    .index-value {
+      margin: 10px 0 0;
+      font-size: 35px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .setup-badge {
+      padding: 10px 12px;
+      border-color: rgba(54, 207, 131, 0.22);
+      color: #bdf7d5;
+      background: rgba(54, 207, 131, 0.12);
+      font-size: 13px;
+    }
+
+    .research-metrics {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .research-metric {
+      padding: 12px;
+      border: 1px solid rgba(29, 54, 85, 0.85);
+      border-radius: 10px;
+      background: rgba(16, 36, 61, 0.45);
+    }
+
+    .research-metric span {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+
+    .research-metric strong {
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .research-rule {
+      margin-top: 10px;
+      padding: 11px 12px;
+      border-radius: 9px;
+      color: var(--muted);
+      background: rgba(69, 182, 255, 0.07);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .research-rule strong {
+      color: var(--text);
+    }
+
+    .research-list {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    input,
+    select {
+      width: 100%;
+      margin-top: 6px;
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      outline: none;
+      color: var(--text);
+      background: rgba(16, 36, 61, 0.8);
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(69, 182, 255, 0.12);
+    }
+
+    .primary-button {
+      margin-top: 4px;
+      padding: 12px 14px;
+      border: 0;
+      border-radius: 9px;
+      color: #052033;
+      background: var(--blue);
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .primary-button:hover {
+      filter: brightness(1.08);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      min-width: 560px;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th,
+    td {
+      padding: 13px 10px;
+      border-bottom: 1px solid rgba(29, 54, 85, 0.8);
+      text-align: left;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 0.7px;
+      text-transform: uppercase;
+    }
+
+    td {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .delete-trade-button {
+      padding: 7px 10px;
+      border: 1px solid rgba(255, 111, 125, 0.35);
+      border-radius: 8px;
+      color: #ffc0c7;
+      background: rgba(255, 111, 125, 0.1);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .delete-trade-button:hover {
+      color: #ffffff;
+      background: rgba(255, 111, 125, 0.22);
+    }
+
+    .empty-note {
+      padding: 16px;
+      border: 1px dashed rgba(147, 169, 195, 0.28);
+      border-radius: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    @media (max-width: 1050px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .dashboard-grid,
+      .paper-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .app-shell {
+        display: block;
+      }
+
+      .sidebar {
+        position: static;
+        height: auto;
+        padding: 14px;
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .brand {
+        padding-bottom: 12px;
+      }
+
+      .nav-label,
+      .sidebar-note {
+        display: none;
+      }
+
+      .nav {
+        display: flex;
+        gap: 7px;
+        overflow-x: auto;
+      }
+
+      .nav-button {
+        width: auto;
+        min-width: max-content;
+        margin: 0;
+      }
+
+      .content {
+        padding: 18px 14px 28px;
+      }
+
+      .topbar,
+      .index-hero {
+        display: block;
+      }
+
+      .market-status,
+      .setup-badge {
+        display: inline-flex;
+        margin-top: 14px;
+      }
+
+      .stats-grid,
+      .research-metrics {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">IM</div>
+        <div class="brand-text">
+          <strong>Indian Market AI</strong>
+          <span>Research Dashboard</span>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="Main navigation">
+        <p class="nav-label">Workspace</p>
+
+        <button class="nav-button active" data-page="dashboard" type="button">
+          <span class="nav-icon">◫</span>
+          Dashboard
+        </button>
+
+        <button class="nav-button" data-page="nifty" type="button">
+          <span class="nav-icon">N</span>
+          NIFTY 50
+        </button>
+
+        <button class="nav-button" data-page="banknifty" type="button">
+          <span class="nav-icon">B</span>
+          Bank Nifty
+        </button>
+
+        <p class="nav-label">Journal</p>
+
+        <button class="nav-button" data-page="paper-trading" type="button">
+          <span class="nav-icon">▣</span>
+          Paper Trading
+        </button>
+      </nav>
+
+      <div class="sidebar-note">
+        <strong>Research-only tool</strong><br />
+        No broker connection, no auto-trading, and no real-money order execution.
+      </div>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Personal Research Workspace</p>
+          <h1 id="page-title">Indian Market Overview</h1>
+          <p class="subtitle" id="page-subtitle">
+            NIFTY 50 and Bank Nifty research dashboard with paper-trading workflow.
+          </p>
+        </div>
+
+        <div class="market-status">
+          <span class="status-dot"></span>
+          Demo data mode
+        </div>
+      </header>
+
+      <section class="page active" id="dashboard">
+        <div class="stats-grid">
+          <article class="card stat-card">
+            <div class="stat-label">NIFTY 50</div>
+            <div class="stat-value">24,680.55</div>
+            <div class="stat-change positive">▲ +0.62% · Demo</div>
+          </article>
+
+          <article class="card stat-card">
+            <div class="stat-label">Bank Nifty</div>
+            <div class="stat-value">55,112.40</div>
+            <div class="stat-change positive">▲ +0.41% · Demo</div>
+          </article>
+
+          <article class="card stat-card">
+            <div class="stat-label">Market Bias</div>
+            <div class="stat-value">Neutral</div>
+            <div class="stat-change neutral">Wait for confirmation</div>
+          </article>
+
+          <article class="card stat-card">
+            <div class="stat-label">Paper Trades</div>
+            <div class="stat-value" id="trade-count">0</div>
+            <div class="stat-change neutral">Journal is ready</div>
+          </article>
+        </div>
+
+        <div class="dashboard-grid">
+          <article class="card section-card">
+            <div class="section-heading">
+              <div>
+                <h2>Market Trend Workspace</h2>
+                <p>Chart integration will be added after the dashboard structure is ready.</p>
+              </div>
+              <span class="tag">Demo chart</span>
+            </div>
+
+            <div class="chart-placeholder">
+              <div class="chart-note">
+                This placeholder represents the future NIFTY 50 / Bank Nifty technical chart area.
+                Next phases will add selected timeframe, trend indicators, and research notes.
+              </div>
+              <div class="line-chart"></div>
+            </div>
+          </article>
+
+          <div class="market-list">
+            <article class="card section-card">
+              <div class="section-heading">
+                <div>
+                  <h2>Index Snapshot</h2>
+                  <p>Sample values only</p>
+                </div>
+              </div>
+
+              <div class="market-list">
+                <div class="market-row">
+                  <div>
+                    <div class="market-name">NIFTY 50</div>
+                    <div class="market-meta">Broad market index</div>
+                  </div>
+                  <div>
+                    <div class="market-price">24,680.55</div>
+                    <div class="market-meta positive">+0.62%</div>
+                  </div>
+                </div>
+
+                <div class="market-row">
+                  <div>
+                    <div class="market-name">BANK NIFTY</div>
+                    <div class="market-meta">Banking sector index</div>
+                  </div>
+                  <div>
+                    <div class="market-price">55,112.40</div>
+                    <div class="market-meta positive">+0.41%</div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="card section-card">
+              <div class="signal-box">
+                <h2 class="signal-title">AI Research Note</h2>
+                <p>
+                  Use this area for setup explanation, key levels, invalidation logic, and
+                  confirmation checks. It is not an order instruction.
+                </p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+            <section class="page" id="nifty">
+        <article class="card index-hero">
+          <div>
+            <p class="eyebrow">NSE Index · Demo values</p>
+            <h2 class="index-title">NIFTY 50 Research</h2>
+            <p class="index-value">
+              24,680.55
+              <span class="positive" style="font-size: 16px;">▲ +0.62%</span>
+            </p>
+            <p class="subtitle">
+              Use market structure, key levels, and confirmation rules before recording a paper trade.
+            </p>
+          </div>
+
+          <div class="setup-badge">Wait for confirmation</div>
+        </article>
+
+        <div class="dashboard-grid">
+          <article class="card section-card">
+            <div class="section-heading">
+              <div>
+                <h2>Technical Research Plan</h2>
+                <p>Example planning framework. Not financial advice.</p>
+              </div>
+              <span class="tag">NIFTY 50</span>
+            </div>
+
+            <div class="research-metrics">
+              <div class="research-metric">
+                <span>Trend</span>
+                <strong>Neutral to mildly positive</strong>
+              </div>
+
+              <div class="research-metric">
+                <span>Support zone</span>
+                <strong>24,520 – 24,580</strong>
+              </div>
+
+              <div class="research-metric">
+                <span>Resistance zone</span>
+                <strong>24,760 – 24,820</strong>
+              </div>
+
+              <div class="research-metric">
+                <span>Invalidation</span>
+                <strong>Close below support zone</strong>
+              </div>
+            </div>
+
+            <div class="research-rule">
+              <strong>Research rule:</strong>
+              Do not treat a level as a trade signal without price action and risk definition.
+            </div>
+          </article>
+
+          <article class="card section-card">
+            <div class="section-heading">
+              <div>
+                <h2>Checklist</h2>
+                <p>Before a paper-trade entry</p>
+              </div>
+            </div>
+
+            <ul class="research-list">
+              <li>Mark current support and resistance.</li>
+              <li>Check whether price is trending or ranging.</li>
+              <li>Define entry, stop-loss, and target in advance.</li>
+              <li>Log the reason for the decision in the journal.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="page" id="banknifty">
+        <article class="card index-hero">
+          <div>
+            <p class="eyebrow">NSE Index · Demo values</p>
+            <h2 class="index-title">Bank Nifty Research</h2>
+            <p class="index-value">
+              55,112.40
+              <span class="positive" style="font-size: 16px;">▲ +0.41%</span>
+            </p>
+            <p class="subtitle">
+              Focus on volatility, banking-sector momentum, and disciplined position sizing for paper research.
+            </p>
+          </div>
+
+          <div class="setup-badge">Volatility awareness</div>
+        </article>
+
+        <div class="dashboard-grid">
+          <article class="card section-card">
+            <div class="section-heading">
+              <div>
+                <h2>Technical Research Plan</h2>
+                <p>Example planning framework. Not financial advice.</p>
+              </div>
+              <span class="tag">Bank Nifty</span>
+            </div>
+
+            <div class="research-metrics">
+              <div class="research-metric">
+                <span>Trend</span>
+                <strong>Neutral with volatility</strong>
+              </div>
+
+              <div class="research-metric">
+                <span>Support zone</span>
+                <strong>54,800 – 54,920</strong>
+              </div>
+
+              <div class="research-metric">
+                <span>Resistance zone</span>
+                <strong>55,250 – 55,420</strong>
+              </div>
+
+              <div class="research-metric">
+                <span>Risk rule</span>
+                <strong>Use smaller paper size</strong>
+              </div>
+            </div>
+
+            <div class="research-rule">
+              <strong>Research rule:</strong>
+              Bank Nifty can move quickly. Define invalidation first and avoid chasing candles.
+            </div>
+          </article>
+
+          <article class="card section-card">
+            <div class="section-heading">
+              <div>
+                <h2>Checklist</h2>
+                <p>Before a paper-trade entry</p>
+              </div>
+            </div>
+
+            <ul class="research-list">
+              <li>Check whether the opening range is established.</li>
+              <li>Identify a clear invalidation level.</li>
+              <li>Keep paper-trade risk consistent across setups.</li>
+              <li>Review the outcome and note what changed.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+            <section class="page" id="paper-trading">
+        <div class="paper-grid">
+          <article class="card section-card">
+            <div class="section-heading">
+              <div>
+                <h2>Add Paper Trade</h2>
+                <p>Saved only in this browser.</p>
+              </div>
+            </div>
+
+            <form class="form-grid" id="paper-trade-form">
+              <label>
+                Index
+                <select id="trade-index" required>
+                  <option value="NIFTY 50">NIFTY 50</option>
+                  <option value="Bank Nifty">Bank Nifty</option>
+                </select>
+              </label>
+
+              <label>
+                Direction
+                <select id="trade-direction" required>
+                  <option value="Buy">Buy</option>
+                  <option value="Sell">Sell</option>
+                </select>
+              </label>
+
+              <label>
+                Entry Price
+                <input
+                  id="trade-entry"
+                  type="number"
+                  min="0"
+                  step="0.05"
+                  placeholder="Example: 24680.55"
+                  required
+                />
+              </label>
+
+              <label>
+                Stop-Loss
+                <input
+                  id="trade-stop"
+                  type="number"
+                  min="0"
+                  step="0.05"
+                  placeholder="Example: 24580"
+                  required
+                />
+              </label>
+
+              <label>
+                Target
+                <input
+                  id="trade-target"
+                  type="number"
+                  min="0"
+                  step="0.05"
+                  placeholder="Example: 24820"
+                  required
+                />
+              </label>
+
+              <button class="primary-button" type="submit">
+                Save Paper Trade
+              </button>
+            </form>
+          </article>
+
+          <article class="card section-card">
+            <div class="section-heading">
+              <div>
+                <h2>Paper Trade Journal</h2>
+                <p>Research log; no broker order is created.</p>
+              </div>
+              <span class="tag" id="journal-count">0 trades</span>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Index</th>
+                    <th>Side</th>
+                    <th>Entry</th>
+                    <th>Stop</th>
+                    <th>Target</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="trade-table-body"></tbody>
+              </table>
+            </div>
+
+            <div class="empty-note" id="empty-trades">
+              No paper trades saved yet. Add a research setup from the form.
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const pageInfo = {
+      dashboard: {
+        title: "Indian Market Overview",
+        subtitle: "NIFTY 50 and Bank Nifty research dashboard with paper-trading workflow."
+      },
+      nifty: {
+        title: "NIFTY 50 Research",
+        subtitle: "Technical research, market structure, and paper-trading preparation."
+      },
+      banknifty: {
+        title: "Bank Nifty Research",
+        subtitle: "Volatility-aware research and disciplined paper-trading preparation."
+      },
+      "paper-trading": {
+        title: "Paper Trading Journal",
+        subtitle: "Record research setups only. No real-money order execution."
+      }
+    };
+
+    const navButtons = document.querySelectorAll(".nav-button");
+    const pages = document.querySelectorAll(".page");
+    const pageTitle = document.getElementById("page-title");
+    const pageSubtitle = document.getElementById("page-subtitle");
+
+    function showPage(pageId) {
+      navButtons.forEach((button) => {
+        button.classList.toggle("active", button.dataset.page === pageId);
+      });
+
+      pages.forEach((page) => {
+        page.classList.toggle("active", page.id === pageId);
+      });
+
+      const info = pageInfo[pageId];
+
+      if (info) {
+        pageTitle.textContent = info.title;
+        pageSubtitle.textContent = info.subtitle;
+      }
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    }
+
+    navButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        showPage(button.dataset.page);
+      });
+    });
+
+    const storageKey = "indianMarketPaperTrades";
+    const form = document.getElementById("paper-trade-form");
+    const tradeTableBody = document.getElementById("trade-table-body");
+    const emptyTrades = document.getElementById("empty-trades");
+    const tradeCount = document.getElementById("trade-count");
+    const journalCount = document.getElementById("journal-count");
+
+    function loadTrades() {
+      try {
+        return JSON.parse(localStorage.getItem(storageKey)) || [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveTrades(trades) {
+      localStorage.setItem(storageKey, JSON.stringify(trades));
+    }
+
+    function escapeText(value) {
+      const div = document.createElement("div");
+      div.textContent = value;
+      return div.innerHTML;
+    }
+
+    function renderTrades() {
+      const trades = loadTrades();
+
+      tradeTableBody.innerHTML = trades
+        .map((trade, index) => {
+          const directionClass = trade.direction === "Buy" ? "positive" : "negative";
+
+          return `
+            <tr>
+              <td>${escapeText(trade.index)}</td>
+              <td class="${directionClass}">${escapeText(trade.direction)}</td>
+              <td>${Number(trade.entry).toFixed(2)}</td>
+              <td>${Number(trade.stop).toFixed(2)}</td>
+              <td>${Number(trade.target).toFixed(2)}</td>
+              <td>
+                <button
+                  class="delete-trade-button"
+                  type="button"
+                  data-delete-index="${index}"
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          `;
+        })
+        .join("");
+
+      emptyTrades.style.display = trades.length ? "none" : "block";
+      tradeCount.textContent = String(trades.length);
+      journalCount.textContent = `${trades.length} ${
+        trades.length === 1 ? "trade" : "trades"
+      }`;
+    }
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const entry = Number(document.getElementById("trade-entry").value);
+      const stop = Number(document.getElementById("trade-stop").value);
+      const target = Number(document.getElementById("trade-target").value);
+
+      if (![entry, stop, target].every((value) => Number.isFinite(value) && value > 0)) {
+        alert("Please enter valid positive prices.");
+        return;
+      }
+
+      const trades = loadTrades();
+
+      trades.unshift({
+        index: document.getElementById("trade-index").value,
+        direction: document.getElementById("trade-direction").value,
+        entry,
+        stop,
+        target
+      });
+
+      saveTrades(trades);
+      form.reset();
+      renderTrades();
+    });
+
+    tradeTableBody.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-delete-index]");
+
+      if (!button) {
+        return;
+      }
+
+      const trades = loadTrades();
+      trades.splice(Number(button.dataset.deleteIndex), 1);
+      saveTrades(trades);
+      renderTrades();
+    });
+
+    renderTrades();
+  </script>
+</body>
+</html>
