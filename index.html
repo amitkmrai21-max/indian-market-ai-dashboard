@@ -1121,6 +1121,31 @@
         width: 8px;
       }
     }
+        .gemini-review-heading {
+      display: block;
+      margin-top: 14px;
+      color: var(--text);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .gemini-review-heading:first-child {
+      margin-top: 0;
+    }
+
+    .gemini-review-paragraph {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .gemini-review-bullet {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
   </style>
 </head>
 
@@ -2493,7 +2518,51 @@
         updateChartPage();
       });
     });
+    function renderGeminiReview(container, reviewText) {
+      const lines = String(reviewText || "")
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean);
 
+      container.replaceChildren();
+
+      lines.forEach((line) => {
+        const headingMatch = line.match(/^#{1,6}\s*(.+)$/);
+        const numberedHeadingMatch = line.match(/^(\d+)\.\s+(.+)$/);
+        const bulletMatch = line.match(/^[-*]\s+(.+)$/);
+
+        const cleanText = (value) =>
+          value
+            .replace(/\*\*(.*?)\*\*/g, "$1")
+            .replace(/__(.*?)__/g, "$1")
+            .replace(/`(.*?)`/g, "$1")
+            .trim();
+
+        let element;
+
+        if (headingMatch) {
+          element = document.createElement("strong");
+          element.className = "gemini-review-heading";
+          element.textContent = cleanText(headingMatch[1]);
+        } else if (numberedHeadingMatch) {
+          element = document.createElement("strong");
+          element.className = "gemini-review-heading";
+          element.textContent = `${numberedHeadingMatch[1]}. ${cleanText(
+            numberedHeadingMatch[2]
+          )}`;
+        } else if (bulletMatch) {
+          element = document.createElement("div");
+          element.className = "gemini-review-bullet";
+          element.textContent = `• ${cleanText(bulletMatch[1])}`;
+        } else {
+          element = document.createElement("p");
+          element.className = "gemini-review-paragraph";
+          element.textContent = cleanText(line);
+        }
+
+        container.appendChild(element);
+      });
+    }
    const chartAiButton = document.getElementById("chart-ai-button");
 
     if (chartAiButton) {
@@ -2529,7 +2598,7 @@
           }
 
           title.textContent = `Gemini review · ${result.market} · ${result.timeframe}`;
-          text.textContent = result.review;
+          renderGeminiReview(text, result.review);
 
           const validUntil = new Date(
             new Date(result.generated_at).getTime() + result.valid_for_seconds * 1000
