@@ -11,7 +11,7 @@ CORS(app)
 
 APP_STARTED_AT = time.time()
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
-GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash").strip()
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.6-flash").strip()
 
 DEMO_MARKETS = {
     "nifty": {
