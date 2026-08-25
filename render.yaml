@@ -1,0 +1,8 @@
+services:
+  - type: web
+    name: indian-market-ai-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn server:app
+    autoDeploy: true
