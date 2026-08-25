@@ -1,10 +1,12 @@
 import os
 import time
+from urllib.parse import quote
 from datetime import datetime, timezone
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from google import genai
+import requests
 
 app = Flask(__name__)
 CORS(app)
@@ -12,7 +14,25 @@ CORS(app)
 APP_STARTED_AT = time.time()
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
 GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.6-flash").strip()
+UPSTOX_ACCESS_TOKEN = os.environ.get("UPSTOX_ACCESS_TOKEN", "").strip()
 
+UPSTOX_MARKETS = {
+    "nifty": {
+        "name": "NIFTY 50",
+        "instrument_key": "NSE_INDEX|Nifty 50",
+    },
+    "banknifty": {
+        "name": "Bank Nifty",
+        "instrument_key": "NSE_INDEX|Nifty Bank",
+    },
+}
+
+UPSTOX_TIMEFRAMES = {
+    "5m": ("minutes", 5),
+    "15m": ("minutes", 15),
+    "1h": ("hours", 1),
+    "1d": ("days", 1),
+}
 DEMO_MARKETS = {
     "nifty": {
         "name": "NIFTY 50",
@@ -388,6 +408,142 @@ def all_markets_analysis():
             },
         }
     )
+@app.get("/api/live/status")
+def live_status():
+    return jsonify(
+        {
+            "ok": True,
+            "provider": "upstox",
+            "token_configured": bool(UPSTOX_ACCESS_TOKEN),
+            "mode": "intraday-candle-polling",
+            "markets": list(UPSTOX_MARKETS.keys()),
+            "supported_timeframes": list(UPSTOX_TIMEFRAMES.keys()),
+            "note": (
+                "Read-only market-data endpoint. This service does not place, "
+                "modify, or cancel orders."
+            ),
+            "updated_at": now_utc(),
+        }
+    )
+
+
+@app.get("/api/live/candles/<market_key>")
+def live_candles(market_key):
+    market_key = market_key.lower().strip()
+    timeframe = request.args.get("timeframe", "5m").lower().strip()
+
+    if market_key not in UPSTOX_MARKETS:
+        return jsonify(
+            {
+                "ok": False,
+                "error": "Unknown market. Use: nifty or banknifty.",
+            }
+        ), 404
+
+    if timeframe not in UPSTOX_TIMEFRAMES:
+        return jsonify(
+            {
+                "ok": False,
+                "error": "Unsupported timeframe. Use: 5m, 15m, 1h, or 1d.",
+            }
+        ), 400
+
+    if not UPSTOX_ACCESS_TOKEN:
+        return jsonify(
+            {
+                "ok": False,
+                "error": "Upstox access token is not configured on the server.",
+            }
+        ), 503
+
+    market = UPSTOX_MARKETS[market_key]
+    unit, interval = UPSTOX_TIMEFRAMES[timeframe]
+    encoded_instrument_key = quote(market["instrument_key"], safe="")
+    upstream_url = (
+        "https://api.upstox.com/v3/historical-candle/intraday/"
+        f"{encoded_instrument_key}/{unit}/{interval}"
+    )
+
+    try:
+        upstream_response = requests.get(
+            upstream_url,
+            headers={
+                "Accept": "application/json",
+                "Authorization": f"Bearer {UPSTOX_ACCESS_TOKEN}",
+            },
+            timeout=15,
+        )
+
+        if not upstream_response.ok:
+            app.logger.warning(
+                "Upstox candle request failed: status=%s",
+                upstream_response.status_code,
+            )
+
+            return jsonify(
+                {
+                    "ok": False,
+                    "provider": "upstox",
+                    "error": "Upstox candle data is temporarily unavailable.",
+                }
+            ), 502
+
+        upstream_data = upstream_response.json()
+        raw_candles = upstream_data.get("data", {}).get("candles", [])
+
+        candles = [
+            {
+                "time": row[0],
+                "open": row[1],
+                "high": row[2],
+                "low": row[3],
+                "close": row[4],
+                "volume": row[5],
+            }
+            for row in reversed(raw_candles)
+            if isinstance(row, list) and len(row) >= 6
+        ]
+
+        if not candles:
+            return jsonify(
+                {
+                    "ok": False,
+                    "provider": "upstox",
+                    "error": "No candle data is available for this instrument and timeframe.",
+                }
+            ), 502
+
+        latest = candles[-1]
+
+        return jsonify(
+            {
+                "ok": True,
+                "provider": "upstox",
+                "mode": "intraday-candle-polling",
+                "market": market["name"],
+                "market_key": market_key,
+                "instrument_key": market["instrument_key"],
+                "timeframe": timeframe,
+                "updated_at": now_utc(),
+                "latest": latest,
+                "candles": candles,
+                "disclaimer": (
+                    "Read-only market data for research and paper trading only. "
+                    "No order placement is available."
+                ),
+            }
+        )
+
+    except requests.RequestException:
+        app.logger.exception("Upstox candle request failed")
+
+        return jsonify(
+            {
+                "ok": False,
+                "provider": "upstox",
+                "error": "Could not reach Upstox candle data right now.",
+            }
+        ), 502
 
 @app.post("/api/gemini/review")
 def gemini_chart_review():
