@@ -474,10 +474,21 @@ def live_candles(market_key):
             timeout=15,
         )
 
-        if not upstream_response.ok:
+              if not upstream_response.ok:
             app.logger.warning(
                 "Upstox candle request failed: status=%s",
                 upstream_response.status_code,
+            )
+
+            print(
+                "LIVE CANDLE DEBUG:",
+                {
+                    "market": market,
+                    "timeframe": timeframe,
+                    "instrument_key": instrument_key,
+                    "upstox_status": upstream_response.status_code,
+                    "upstox_body": upstream_response.text[:1000],
+                },
             )
 
             return jsonify(
@@ -487,7 +498,6 @@ def live_candles(market_key):
                     "error": "Upstox candle data is temporarily unavailable.",
                 }
             ), 502
-
         upstream_data = upstream_response.json()
         raw_candles = upstream_data.get("data", {}).get("candles", [])
 
