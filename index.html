@@ -2323,7 +2323,112 @@
         stopLine.querySelector("span").textContent = `Stop ${profile.stop}`;
       }
     }
+    
+    const MARKET_API_BASE = "https://indian-market-ai-api.onrender.com";
 
+    function formatPriceRange(from, to) {
+      if (from === null || from === undefined || to === null || to === undefined) {
+        return "Wait for confirmation";
+      }
+
+      return `${formatNumber(from)} – ${formatNumber(to)}`;
+    }
+
+    function formatPlanValue(value) {
+      if (value === null || value === undefined) {
+        return "Not active";
+      }
+
+      return formatNumber(value);
+    }
+
+    function updateChartWithBackendData(data) {
+      const profile = getDemoMarketProfile(selectedChartMarket);
+      const decisionLabel = data.decision?.label || "WAIT";
+      const tradePlan = data.trade_plan || {};
+      const levels = data.levels || {};
+
+      profile.price = data.price ?? profile.price;
+      profile.support = levels.support ?? profile.support;
+      profile.resistance = levels.resistance ?? profile.resistance;
+      profile.decision = decisionLabel;
+      profile.entry = formatPriceRange(
+        tradePlan.entry_zone?.from,
+        tradePlan.entry_zone?.to
+      );
+      profile.stop = formatPlanValue(tradePlan.stop_loss);
+      profile.target1 = formatPlanValue(tradePlan.target_1);
+      profile.target2 = formatPlanValue(tradePlan.target_2);
+      profile.exit = tradePlan.exit_rule || profile.exit;
+
+      const title = document.getElementById("chart-market-title");
+      const subtitle = document.getElementById("chart-market-subtitle");
+      const status = document.getElementById("chart-data-status");
+      const price = document.getElementById("chart-last-price");
+      const decision = document.getElementById("chart-decision");
+      const entry = document.getElementById("chart-entry-value");
+      const stop = document.getElementById("chart-stop-value");
+      const target1 = document.getElementById("chart-target-1-value");
+      const target2 = document.getElementById("chart-target-2-value");
+      const exit = document.getElementById("chart-exit-value");
+      const buyMarker = document.getElementById("chart-buy-marker");
+      const sellMarker = document.getElementById("chart-sell-marker");
+
+      if (!title) {
+        return;
+      }
+
+      title.textContent = `${data.market || profile.name} · ${selectedChartTimeframe}`;
+      subtitle.textContent =
+        "Backend confirmation-engine data. Demo market values remain active until Upstox live data is connected.";
+      status.textContent = "Backend demo feed";
+      price.textContent = formatNumber(profile.price);
+      decision.textContent = profile.decision;
+      decision.className = `chart-decision ${decisionClass(profile.decision)}`;
+
+      entry.textContent = profile.entry;
+      stop.textContent = profile.stop;
+      target1.textContent = profile.target1;
+      target2.textContent = profile.target2;
+      exit.textContent = profile.exit;
+
+      buyMarker.style.display = profile.decision.includes("BUY") ? "block" : "none";
+      sellMarker.style.display = profile.decision.includes("SELL") ? "block" : "none";
+
+      setChartLevelLabels(profile);
+      renderChartCandles(selectedChartMarket, selectedChartTimeframe);
+    }
+
+    async function refreshChartFromBackend() {
+      const requestMarket = selectedChartMarket;
+
+      try {
+        const response = await fetch(
+          `${MARKET_API_BASE}/api/market/${requestMarket}`
+        );
+
+        const result = await response.json();
+
+        if (!response.ok || !result.ok || !result.data) {
+          throw new Error(result.error || "Backend market data is unavailable.");
+        }
+
+        if (requestMarket !== selectedChartMarket) {
+          return;
+        }
+
+        updateChartWithBackendData(result.data);
+      } catch (error) {
+        const status = document.getElementById("chart-data-status");
+
+        if (status) {
+          status.textContent = "Demo fallback";
+        }
+
+        console.error("Chart backend sync failed:", error);
+      }
+    }
+    
     function updateChartPage() {
       const profile = getDemoMarketProfile(selectedChartMarket);
       const title = document.getElementById("chart-market-title");
@@ -2361,6 +2466,7 @@
 
       setChartLevelLabels(profile);
       renderChartCandles(selectedChartMarket, selectedChartTimeframe);
+            refreshChartFromBackend();
     }
 
     document.querySelectorAll("[data-chart-market]").forEach((button) => {
@@ -2372,6 +2478,7 @@
         });
 
         updateChartPage();
+        refreshChartFromBackend();
       });
     });
 
