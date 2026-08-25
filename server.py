@@ -1,13 +1,17 @@
+import os
 import time
 from datetime import datetime, timezone
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
+from google import genai
 
 app = Flask(__name__)
 CORS(app)
 
 APP_STARTED_AT = time.time()
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash").strip()
 
 DEMO_MARKETS = {
     "nifty": {
@@ -385,6 +389,117 @@ def all_markets_analysis():
         }
     )
 
+@app.post("/api/gemini/review")
+def gemini_chart_review():
+    payload = request.get_json(silent=True) or {}
 
+    market_key = str(payload.get("market", "")).lower().strip()
+    timeframe = str(payload.get("timeframe", "5m")).lower().strip()
+
+    if market_key not in DEMO_MARKETS:
+        return jsonify(
+            {
+                "ok": False,
+                "error": "Unknown market. Use: nifty or banknifty.",
+            }
+        ), 400
+
+    allowed_timeframes = {"5m", "15m", "1h", "1d"}
+
+    if timeframe not in allowed_timeframes:
+        return jsonify(
+            {
+                "ok": False,
+                "error": "Unsupported timeframe. Use: 5m, 15m, 1h, or 1d.",
+            }
+        ), 400
+
+    if not GEMINI_API_KEY:
+        return jsonify(
+            {
+                "ok": False,
+                "error": "Gemini is not configured on the server.",
+            }
+        ), 503
+
+    analysis = calculate_confirmation_engine(DEMO_MARKETS[market_key])
+
+    prompt = f"""
+You are a cautious Indian index-market research assistant. This is strictly for educational research
+and paper trading only; do not give financial advice, guarantee an outcome, or tell the user to place
+a real trade.
+
+Review the following technical-engine snapshot for {analysis["market"]} on the {timeframe} timeframe.
+
+Current price: {analysis["price"]}
+Open / high / low: {analysis["open"]} / {analysis["high"]} / {analysis["low"]}
+Decision: {analysis["decision"]["label"]}
+Decision reason: {analysis["decision"]["reason"]}
+Weighted score: {analysis["decision"]["weighted_score"]} of {analysis["decision"]["max_score"]}
+RSI 14: {analysis["indicators"]["rsi_14"]}
+EMA 9 / EMA 21 / EMA 50: {analysis["indicators"]["ema_9"]} / {analysis["indicators"]["ema_21"]} / {analysis["indicators"]["ema_50"]}
+VWAP: {analysis["indicators"]["vwap"]}
+MACD histogram: {analysis["indicators"]["macd_histogram"]}
+Volume ratio: {analysis["indicators"]["volume_ratio"]}
+Support / resistance: {analysis["levels"]["support"]} / {analysis["levels"]["resistance"]}
+Entry zone: {analysis["trade_plan"]["entry_zone"]["from"]} to {analysis["trade_plan"]["entry_zone"]["to"]}
+Entry condition: {analysis["trade_plan"]["entry_zone"]["condition"]}
+Stop loss: {analysis["trade_plan"]["stop_loss"]}
+Target 1 / Target 2: {analysis["trade_plan"]["target_1"]} / {analysis["trade_plan"]["target_2"]}
+Exit rule: {analysis["trade_plan"]["exit_rule"]}
+
+Write a concise Hinglish review with exactly these five headings:
+1. Bias
+2. Confirmation
+3. Levels
+4. Invalidation
+5. Risk note
+
+Rules:
+- Mention that this is a demo-data research snapshot if relevant.
+- Do not invent live news, live prices, option-chain data, candle patterns, or unprovided indicators.
+- Do not suggest real-money trading or use imperative execution language.
+- Keep the reply below 220 words.
+"""
+
+    try:
+        client = genai.Client(api_key=GEMINI_API_KEY)
+
+        response = client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=prompt,
+        )
+
+        review_text = (response.text or "").strip()
+
+        if not review_text:
+            return jsonify(
+                {
+                    "ok": False,
+                    "error": "Gemini returned an empty review. Please try again.",
+                }
+            ), 502
+
+        return jsonify(
+            {
+                "ok": True,
+                "market": analysis["market"],
+                "timeframe": timeframe,
+                "generated_at": now_utc(),
+                "valid_for_seconds": 300,
+                "review": review_text,
+                "disclaimer": "Research and paper-trading only. Not financial advice and not a live-market recommendation.",
+            }
+        )
+
+    except Exception:
+        app.logger.exception("Gemini review request failed")
+
+        return jsonify(
+            {
+                "ok": False,
+                "error": "Gemini review is temporarily unavailable. Please try again later.",
+            }
+        ), 502
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
